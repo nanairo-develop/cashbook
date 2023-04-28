@@ -1,30 +1,19 @@
 ﻿using cashbook.common;
-using static cashbook.FormPurchaseDetailDao;
+using cashbook.dto;
 using MySqlConnector;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.VisualBasic;
-using System.Reflection;
+using System.Diagnostics;
+using static cashbook.FormPurchaseDetailDao;
 
 namespace cashbook
 {
     public partial class FormPurchaseDetail : Form
     {
-        int purchaseId;
-        int managerId;
-        int officeId;
-
-        DataTable office = new();
-        DataTable manager = new();
+        private int purchaseId;
+        private readonly int managerId;
+        private readonly int officeId;
+        private readonly DataTable office = new();
+        private readonly DataTable manager = new();
 
         private enum DataSumColumns
         {
@@ -44,7 +33,6 @@ namespace cashbook
         public FormPurchaseDetail()
         {
             InitializeComponent();
-            PayDatePicker.Value = DateTime.Now;
             managerId = 0;
             officeId = 0;
             Insert.Enabled = true;
@@ -55,7 +43,7 @@ namespace cashbook
         {
             InitializeComponent();
             purchaseId = id;
-            PayDatePicker.Value = payDate;
+            DatePicker.Value = payDate;
             this.managerId = managerId;
             this.officeId = officeId;
             SlipNumber.Text = slipNumber;
@@ -67,35 +55,20 @@ namespace cashbook
         #region イベント
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
-
-            MySqlConnection conn = new(ComConst.connStr);
-
             // コンボボックスの設定
-            string selectManager = GetSelectManager(PayDatePicker.Value);
+            string selectManager = GetSelectManager(DatePicker.Value);
             SetComboBox(manager, selectManager, ComboManager, "name", "id");
+
             string selectOffice = GetSelectOffice();
             SetComboBox(office, selectOffice, ComboOffice, "name", "id");
 
-            // 接続を開く
-            conn.Open();
-
-            // 明細行の取得
-
-            // データを取得するテーブル
-            DataTable tbl = new();
-
-            // クエリを作成する
-            var query = GetSelectPurchaseDetail(purchaseId);
-
-            MySqlDataAdapter dataAdp = new(query, conn);
-            _ = dataAdp.Fill(tbl);
-
-            DetailList.DataSource = tbl;
+            SetDetailList();
 
             ComboManager.SelectedValue = managerId;
             ComboOffice.SelectedValue = officeId;
             SumData[(int)DataSumColumns.receivableSum, 0].Value = SumAmount((int)DetailListColumns.receivable);
             SumData[(int)DataSumColumns.payableSum, 0].Value = SumAmount((int)DetailListColumns.payable);
+
         }
 
         private void DetailList_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
@@ -138,9 +111,37 @@ namespace cashbook
                     break;
             }
         }
+        private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
+        {
+            //コンボボックスのデータの更新の為
+            DataView dv = office.DefaultView;
+            //コンボボックスに入力された文字列でフィルター
+            dv.RowFilter = "name LIKE '*" + ComboOffice.Text + "*'";
+        }
+
+        private void Insert_Click(object sender, EventArgs e)
+        {
+            // MessageAreaの初期化
+            MessageArea.Text = "";
+            // チェック処理
+            if (!CheckValid())
+            {
+                return;
+            };
+
+            // Insert
+            ExecInsert();
+
+            // 実行結果メッセージ表示
+
+            // 画面再読み込み
+
+        }
+
         #endregion イベント
 
         #region メソッド
+        #region 検索処理
         /// <summary>
         /// コンボボックスの選択候補をDBから設定する
         /// </summary>
@@ -149,7 +150,12 @@ namespace cashbook
         /// <param name="comboBox"></param>
         /// <param name="displayMember"></param>
         /// <param name="valueMember"></param>
-        private static void SetComboBox(DataTable dt, string query, ComboBox comboBox, string displayMember, string valueMember)
+        private static void SetComboBox(
+            DataTable dt,
+            string query,
+            ComboBox comboBox,
+            string displayMember,
+            string valueMember)
         {
             MySqlConnection conn = new(ComConst.connStr);
 
@@ -171,31 +177,156 @@ namespace cashbook
 
         }
 
-        private void Insert_Click(object sender, EventArgs e)
+        private int SumAmount(int col)
         {
-            // チェック処理
-            if (!CheckValid())
+            int sum = 0;
+            for (int i = 0; i < DetailList.RowCount - 1; i++)
             {
-                return;
-            };
+                sum += int.TryParse(DetailList[col, i].Value.ToString(), out int a) ? a : 0;
+            }
+            return sum;
+        }
+        private void ExecInsert()
+        {
+            using MySqlConnection conn = new(ComConst.connStr);
+            // 接続を開く
+            conn.Open();
+            using MySqlTransaction transaction = conn.BeginTransaction();
+            try
+            {
+                // ヘダー行Insert
+                InsertPurchase(conn, transaction);
 
-            // Insert
-            var query = ExecInsert();
+                // ヘダー行を検索して明細テーブルのpurchaseIdを取得
+                purchaseId = SelectPurchaseId(conn, transaction);
 
-            // 実行結果メッセージ表示
+                // 明細行Insert
+                InsertPurchaseDetail(purchaseId, conn, transaction);
+                transaction.Commit();
 
-            // 画面再読み込み
+            }
+            catch (Exception me)
+            {
+                transaction.Rollback();
+                _ = MessageBox.Show("ERROR: " + me.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+        private void SetDetailList()
+        {
+            using MySqlConnection conn = new(ComConst.connStr);
+
+            // 接続を開く
+            conn.Open();
+
+            // 明細行の取得
+            // データを取得するテーブル
+            DataTable tbl = new();
+
+            // クエリを作成する
+            string query = GetSelectPurchaseDetail(purchaseId);
+
+            MySqlDataAdapter dataAdp = new(query, conn);
+            _ = dataAdp.Fill(tbl);
+
+            DetailList.DataSource = tbl;
 
         }
+        #endregion 検索処理
 
+        #region 更新処理
+        private void InsertPurchase(MySqlConnection conn, MySqlTransaction transaction)
+        {
+            TPurchaseDto tPurchaseDto = new(
+                DatePicker.Value,
+                ComboOffice.SelectedValue,
+                ComboManager.SelectedValue,
+                SlipNumber.Text);
+            string query = GetPurchaseInsert(tPurchaseDto);
+
+            using MySqlCommand command = conn.CreateCommand();
+            command.CommandText = query;
+            command.Transaction = transaction;
+
+            int result = command.ExecuteNonQuery();
+            // 挿入されなかった場合
+            if (result != 1)
+            {
+                _ = MessageBox.Show("insert ERROR");
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>エラーの場合は0が返却される</returns>
+        private static int SelectPurchaseId(MySqlConnection conn, MySqlTransaction transaction)
+        {
+            int ret = 0;
+            using MySqlCommand command = conn.CreateCommand();
+            try
+            {
+                command.CommandText = GetSelectPurchaseId();
+                command.Transaction = transaction;
+
+                object? scalar = command.ExecuteScalar();
+                ret = scalar is not null ? (int)scalar : throw new Exception(message: "ヘダーInsertが失敗している");
+            }
+            catch (MySqlException mse)
+            {
+                _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return ret;
+        }
+        private void InsertPurchaseDetail(int purchaseId, MySqlConnection conn, MySqlTransaction transaction)
+        {
+            List<TPurchaseDetailDto> purchaseDetailDtos = new();
+            for (int i = 0; i < DetailList.RowCount - 1; i++)
+            {
+                DataGridViewRow rows = DetailList.Rows[i];
+                if (rows.Cells[0].Value is null)
+                {
+                    break;
+                }
+                else
+                {
+                    purchaseDetailDtos.Add(new(
+                        purchaseId: purchaseId,
+                        branchId: (int)rows.Cells[0].Value,
+                        description: (string)rows.Cells[1].Value,
+                        receivable: (int)rows.Cells[2].Value,
+                        payable: (int)rows.Cells[3].Value,
+                        useForFood: (bool)rows.Cells[4].Value));
+                }
+            }
+
+            using MySqlCommand command = conn.CreateCommand();
+            command.CommandText = GetInsertPurchaseDetail(purchaseDetailDtos);
+            command.Transaction = transaction;
+
+            int result = command.ExecuteNonQuery();
+            // 挿入されなかった場合
+            if (result != 1)
+            {
+                _ = MessageBox.Show("insert ERROR");
+            }
+
+        }
+        #endregion 更新処理
+
+        #region チェック処理
         private bool CheckValid()
         {
             bool ret = true;
             // 日付
             // 未来日付はNG
-            if (PayDatePicker.Value > DateTime.Now)
+            if (DatePicker.Value > DateTime.Now)
             {
                 ComControl.SetErrorLabelColor(PayDatePickerLabel);
+                MessageArea.Text += "";
                 ret = false;
             }
             else
@@ -242,97 +373,45 @@ namespace cashbook
 
             // 明細
             // 件数0はNG
+            if (DetailList.RowCount == 1)
+            {
+                ComControl.SetErrorGridColor(DetailList.DefaultCellStyle);
+                ret = false;
+            }
+            else
+            {
+                ComControl.SetClearGridColor(DetailList.DefaultCellStyle);
+            }
             // 内容無しはNG
-            // 金額無しはNG
-
+            if (!IsExistDescription())
+            {
+                ret = false;
+            }
             return ret;
         }
 
-        private int SumAmount(int col)
+        private bool IsExistDescription()
         {
-            int sum = 0;
+            bool ret = true;
             for (int i = 0; i < DetailList.RowCount - 1; i++)
             {
-                sum += int.TryParse(DetailList[col, i].Value.ToString(), out int a) ? a : 0;
+                DataGridViewRow row = DetailList.Rows[i];
+                // 内容無しはNG
+                if (row.Cells[1].Value.ToString() == string.Empty)
+                {
+                    ComControl.SetErrorGridColor(row.Cells[1].Style);
+                    ret = false;
+                    Debug.WriteLine("未記載");
+                }
+                else
+                {
+                    ComControl.SetClearGridColor(row.Cells[1].Style);
+                }
             }
-            return sum;
+            return ret;
         }
+        #endregion チェック処理
         #endregion メソッド
 
-        private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
-        {
-            //コンボボックスのデータの更新の為
-            DataView dv = office.DefaultView;
-            //コンボボックスに入力された文字列でフィルター
-            dv.RowFilter = "name LIKE '*" + ComboOffice.Text + "*'";
-        }
-
-        private string ExecInsert()
-        {
-            // ヘダー行Insert
-            InsertPurchase();
-
-            // ヘダー行を検索して明細テーブルのpurchaseIdを取得
-            purchaseId = SelectPurchaseId();
-
-            // 明細行Insert
-            InsertPurchaseDetail();
-            string query = $"""
-
-                ;
-                """;
-            return query;
-        }
-
-        private void InsertPurchase()
-        {
-            MySqlConnection conn = new(ComConst.connStr);
-            try
-            {
-                // 接続を開く
-                conn.Open();
-                string query = GetPurchaseInsert(
-                    PayDatePicker.Value,
-                    ComboOffice.SelectedValue,
-                    ComboManager.SelectedValue,
-                    SlipNumber.Text
-                    );
-                MySqlCommand command = new(query, conn);
-                var result = command.ExecuteNonQuery();
-                // 挿入されなかった場合
-                if (result != 1)
-                {
-                    _ = MessageBox.Show("insert ERROR");
-                }
-
-                //クローズ
-                conn.Close();
-            }
-            catch(MySqlException me)
-            {
-                _ = MessageBox.Show("ERROR: " + me.Message);
-            }
-        }
-
-        private int SelectPurchaseId()
-        {
-            MySqlConnection conn = new(ComConst.connStr);
-
-            // 接続を開く
-            conn.Open();
-
-            string query = GetSelectPurchaseId();
-
-            DataTable dt = new();
-
-            MySqlDataAdapter dataAdapter = new(query, conn);
-            _ = dataAdapter.Fill(dt);
-
-            return (int)dt.Rows[0]["id"];
-        }
-        private void InsertPurchaseDetail()
-        {
-
-        }
     }
 }

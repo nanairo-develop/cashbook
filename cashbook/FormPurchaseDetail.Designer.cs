@@ -28,10 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             PayDatePickerLabel = new Label();
             ComboOfficeLabel = new Label();
             ComboManagerLabel = new Label();
-            PayDatePicker = new DateTimePicker();
             ComboManager = new ComboBox();
             ComboOffice = new ComboBox();
             DetailList = new DataGridView();
@@ -42,6 +42,8 @@
             SlipNumber = new TextBox();
             SlipNumberLabel = new Label();
             Change = new Button();
+            MessageArea = new TextBox();
+            DatePicker = new UserDateCombo();
             ((System.ComponentModel.ISupportInitialize)DetailList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SumData).BeginInit();
             SuspendLayout();
@@ -73,22 +75,13 @@
             ComboManagerLabel.TabIndex = 2;
             ComboManagerLabel.Text = "担当者";
             // 
-            // PayDatePicker
-            // 
-            PayDatePicker.CalendarMonthBackground = Color.White;
-            PayDatePicker.Location = new Point(49, 3);
-            PayDatePicker.MinDate = new DateTime(2020, 1, 1, 0, 0, 0, 0);
-            PayDatePicker.Name = "PayDatePicker";
-            PayDatePicker.Size = new Size(200, 23);
-            PayDatePicker.TabIndex = 3;
-            // 
             // ComboManager
             // 
             ComboManager.FormattingEnabled = true;
             ComboManager.Location = new Point(521, 6);
             ComboManager.Name = "ComboManager";
             ComboManager.Size = new Size(121, 23);
-            ComboManager.TabIndex = 4;
+            ComboManager.TabIndex = 2;
             // 
             // ComboOffice
             // 
@@ -96,17 +89,25 @@
             ComboOffice.Location = new Point(85, 42);
             ComboOffice.Name = "ComboOffice";
             ComboOffice.Size = new Size(285, 23);
-            ComboOffice.TabIndex = 5;
+            ComboOffice.TabIndex = 3;
             ComboOffice.KeyDown += ComboOffice_KeyDown;
             // 
             // DetailList
             // 
             DetailList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            DetailList.DefaultCellStyle = dataGridViewCellStyle2;
             DetailList.Location = new Point(12, 71);
             DetailList.Name = "DetailList";
             DetailList.RowTemplate.Height = 25;
             DetailList.Size = new Size(776, 227);
-            DetailList.TabIndex = 6;
+            DetailList.TabIndex = 5;
             DetailList.CellEnter += DetailList_CellEnter;
             DetailList.CellValidating += DetailList_CellValidating;
             // 
@@ -135,10 +136,10 @@
             // 
             // Insert
             // 
-            Insert.Location = new Point(713, 304);
+            Insert.Location = new Point(611, 304);
             Insert.Name = "Insert";
             Insert.Size = new Size(75, 23);
-            Insert.TabIndex = 8;
+            Insert.TabIndex = 7;
             Insert.Text = "登録";
             Insert.UseVisualStyleBackColor = true;
             Insert.Click += Insert_Click;
@@ -148,7 +149,7 @@
             SlipNumber.Location = new Point(521, 42);
             SlipNumber.Name = "SlipNumber";
             SlipNumber.Size = new Size(100, 23);
-            SlipNumber.TabIndex = 9;
+            SlipNumber.TabIndex = 4;
             // 
             // SlipNumberLabel
             // 
@@ -161,18 +162,41 @@
             // 
             // Change
             // 
-            Change.Location = new Point(632, 304);
+            Change.Location = new Point(530, 304);
             Change.Name = "Change";
             Change.Size = new Size(75, 23);
-            Change.TabIndex = 11;
+            Change.TabIndex = 6;
             Change.Text = "更新";
             Change.UseVisualStyleBackColor = true;
+            // 
+            // MessageArea
+            // 
+            MessageArea.BackColor = Color.NavajoWhite;
+            MessageArea.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            MessageArea.Location = new Point(12, 364);
+            MessageArea.Multiline = true;
+            MessageArea.Name = "MessageArea";
+            MessageArea.ScrollBars = ScrollBars.Vertical;
+            MessageArea.Size = new Size(674, 74);
+            MessageArea.TabIndex = 11;
+            // 
+            // DatePicker
+            // 
+            DatePicker.IntDay = 0;
+            DatePicker.IntMonth = 0;
+            DatePicker.IntYear = 0;
+            DatePicker.Location = new Point(49, -4);
+            DatePicker.Name = "DatePicker";
+            DatePicker.Size = new Size(270, 40);
+            DatePicker.TabIndex = 12;
             // 
             // FormPurchaseDetail
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(DatePicker);
+            Controls.Add(MessageArea);
             Controls.Add(Change);
             Controls.Add(SlipNumberLabel);
             Controls.Add(SlipNumber);
@@ -181,11 +205,11 @@
             Controls.Add(DetailList);
             Controls.Add(ComboOffice);
             Controls.Add(ComboManager);
-            Controls.Add(PayDatePicker);
             Controls.Add(ComboManagerLabel);
             Controls.Add(ComboOfficeLabel);
             Controls.Add(PayDatePickerLabel);
             Name = "FormPurchaseDetail";
+            StartPosition = FormStartPosition.Manual;
             Text = "FormPurchaseDetail";
             Load += FormPurchaseDetail_Load;
             ((System.ComponentModel.ISupportInitialize)DetailList).EndInit();
@@ -199,7 +223,6 @@
         private Label PayDatePickerLabel;
         private Label ComboOfficeLabel;
         private Label ComboManagerLabel;
-        private DateTimePicker PayDatePicker;
         private ComboBox ComboManager;
         private ComboBox ComboOffice;
         private DataGridView DetailList;
@@ -210,5 +233,8 @@
         private TextBox SlipNumber;
         private Label SlipNumberLabel;
         private Button Change;
+        private Label MessageLabel;
+        private TextBox MessageArea;
+        private UserDateCombo DatePicker;
     }
 }

@@ -1,8 +1,10 @@
-﻿namespace cashbook
+﻿using cashbook.dto;
+
+namespace cashbook
 {
     internal class FormPurchaseDetailDao
     {
-        public static string GetPurchaseInsert(DateTime payDate, object? office, object? manager, string slipNumber)
+        public static string GetPurchaseInsert(TPurchaseDto tPurchaseDto)
         {
             return $"""
                 INSERT INTO t_purchase
@@ -13,10 +15,10 @@
                     slipNumber
                 )
                 VALUES(
-                    '{payDate:d}'.
-                    {office},
-                    {manager},
-                    '{slipNumber}'
+                    '{tPurchaseDto.PayDate:d}',
+                    {tPurchaseDto.Destination},
+                    {tPurchaseDto.Manager},
+                    '{tPurchaseDto.SlipNumber}'
                 );
                 """;
         }
@@ -72,7 +74,41 @@
                 ;
                 """;
         }
+        public static string GetInsertPurchaseDetail(List<TPurchaseDetailDto> purchaseDetailDtos)
+        {
+
+            string values = string.Empty;
+            foreach (TPurchaseDetailDto purchaseDetailDto in purchaseDetailDtos)
+            
+            {
+                values = $"""
+                (
+                    {purchaseDetailDto.PurchaseId},
+                    {purchaseDetailDto.BranchId},
+                    '{purchaseDetailDto.Description}',
+                    {purchaseDetailDto.Receivable},
+                    {purchaseDetailDto.Payable},
+                    {purchaseDetailDto.UseForFood}
+                ),
+                """;
+            }
+            values = values[..^1];
 
 
+            return $"""
+                INSERT INTO t_purchaseDetail
+                (
+                    purchaseId,
+                    branchId,
+                    description,
+                    receivable,
+                    payable,
+                    useForFood
+                )
+                VALUES
+                    {values}
+                ;
+                """;
+        }
     }
 }
