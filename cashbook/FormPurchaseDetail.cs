@@ -3,6 +3,7 @@ using cashbook.dto;
 using MySqlConnector;
 using System.Data;
 using System.Diagnostics;
+using System.Globalization;
 using static cashbook.FormPurchaseDetailDao;
 
 namespace cashbook
@@ -66,8 +67,16 @@ namespace cashbook
 
             ComboManager.SelectedValue = managerId;
             ComboOffice.SelectedValue = officeId;
-            SumData[(int)DataSumColumns.receivableSum, 0].Value = SumAmount((int)DetailListColumns.receivable);
-            SumData[(int)DataSumColumns.payableSum, 0].Value = SumAmount((int)DetailListColumns.payable);
+
+            SumData.AllowUserToAddRows = false;
+            SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
+            //SumData[(int)DataSumColumns.receivableSum, 0].Value = SumAmount((int)DetailListColumns.receivable);
+            SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Format = "c";
+
+            //SumData[(int)DataSumColumns.payableSum, 0].Value = SumAmount((int)DetailListColumns.payable);
+            SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Format = "c";
 
         }
 
@@ -82,8 +91,11 @@ namespace cashbook
                     {
                         DetailList[e.ColumnIndex, e.RowIndex].Value = 0;
                     }
-
-                    if (int.TryParse(e.FormattedValue.ToString(), out _))
+                    CultureInfo provider = new("ja-JP");
+                    NumberStyles styles = NumberStyles.Integer
+                                          | NumberStyles.AllowCurrencySymbol
+                                          | NumberStyles.AllowThousands;
+                    if (int.TryParse(e.FormattedValue.ToString(), styles, provider, out _))
                     {
                         // 合計値を計算
                         SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
@@ -141,6 +153,16 @@ namespace cashbook
         #endregion イベント
 
         #region メソッド
+        private int SumAmount(int col)
+        {
+            int sum = 0;
+            for (int i = 0; i < DetailList.RowCount; i++)
+            {
+                sum += int.TryParse(DetailList[col, i].Value.ToString(), out int a) ? a : 0;
+            }
+            return sum;
+        }
+
         #region 検索処理
         /// <summary>
         /// コンボボックスの選択候補をDBから設定する
@@ -177,15 +199,65 @@ namespace cashbook
 
         }
 
-        private int SumAmount(int col)
+        private void SetDetailList()
         {
-            int sum = 0;
-            for (int i = 0; i < DetailList.RowCount - 1; i++)
-            {
-                sum += int.TryParse(DetailList[col, i].Value.ToString(), out int a) ? a : 0;
-            }
-            return sum;
+            DetailList.AllowUserToAddRows = false;
+            DetailList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            DetailList.DataSource = GetPurchaseDetails();
+            DetailList.Columns["description"].Width = 200;
+            DetailList.Columns["description"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            DetailList.Columns["receivable"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            DetailList.Columns["receivable"].DefaultCellStyle.Format = "c";
+            DetailList.Columns["payable"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            DetailList.Columns["payable"].DefaultCellStyle.Format = "c";
         }
+
+        private DataTable GetPurchaseDetails()
+        {
+            using MySqlConnection conn = new(ComConst.connStr);
+
+            // 接続を開く
+            conn.Open();
+
+            // 明細行の取得
+            // データを取得するテーブル
+            DataTable dt = new();
+
+            // クエリを作成する
+            string query = GetSelectPurchaseDetail(purchaseId);
+
+            MySqlDataAdapter dataAdp = new(query, conn);
+            _ = dataAdp.Fill(dt);
+
+            return dt;
+
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>エラーの場合は0が返却される</returns>
+        private static int SelectPurchaseId(MySqlConnection conn, MySqlTransaction transaction)
+        {
+            int ret = 0;
+            using MySqlCommand command = conn.CreateCommand();
+            try
+            {
+                command.CommandText = GetSelectPurchaseId();
+                command.Transaction = transaction;
+
+                object? scalar = command.ExecuteScalar();
+                ret = scalar is not null ? (int)scalar : throw new Exception(message: "ヘダーInsertが失敗している");
+            }
+            catch (MySqlException mse)
+            {
+                _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return ret;
+        }
+
+        #endregion 検索処理
+
+        #region 更新処理
         private void ExecInsert()
         {
             using MySqlConnection conn = new(ComConst.connStr);
@@ -215,29 +287,7 @@ namespace cashbook
                 conn.Close();
             }
         }
-        private void SetDetailList()
-        {
-            using MySqlConnection conn = new(ComConst.connStr);
 
-            // 接続を開く
-            conn.Open();
-
-            // 明細行の取得
-            // データを取得するテーブル
-            DataTable tbl = new();
-
-            // クエリを作成する
-            string query = GetSelectPurchaseDetail(purchaseId);
-
-            MySqlDataAdapter dataAdp = new(query, conn);
-            _ = dataAdp.Fill(tbl);
-
-            DetailList.DataSource = tbl;
-
-        }
-        #endregion 検索処理
-
-        #region 更新処理
         private void InsertPurchase(MySqlConnection conn, MySqlTransaction transaction)
         {
             TPurchaseDto tPurchaseDto = new(
@@ -258,29 +308,6 @@ namespace cashbook
                 _ = MessageBox.Show("insert ERROR");
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>エラーの場合は0が返却される</returns>
-        private static int SelectPurchaseId(MySqlConnection conn, MySqlTransaction transaction)
-        {
-            int ret = 0;
-            using MySqlCommand command = conn.CreateCommand();
-            try
-            {
-                command.CommandText = GetSelectPurchaseId();
-                command.Transaction = transaction;
-
-                object? scalar = command.ExecuteScalar();
-                ret = scalar is not null ? (int)scalar : throw new Exception(message: "ヘダーInsertが失敗している");
-            }
-            catch (MySqlException mse)
-            {
-                _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            return ret;
-        }
         private void InsertPurchaseDetail(int purchaseId, MySqlConnection conn, MySqlTransaction transaction)
         {
             List<TPurchaseDetailDto> purchaseDetailDtos = new();
@@ -295,7 +322,7 @@ namespace cashbook
                 {
                     purchaseDetailDtos.Add(new(
                         purchaseId: purchaseId,
-                        branchId: (int)rows.Cells[0].Value,
+                        branchId: (sbyte)rows.Cells[0].Value,
                         description: (string)rows.Cells[1].Value,
                         receivable: (int)rows.Cells[2].Value,
                         payable: (int)rows.Cells[3].Value,
@@ -325,13 +352,13 @@ namespace cashbook
             // 未来日付はNG
             if (DatePicker.Value > DateTime.Now)
             {
-                ComControl.SetErrorLabelColor(PayDatePickerLabel);
+                ComControl.SetErrorLabelColor(DatePickerLabel);
                 MessageArea.Text += "";
                 ret = false;
             }
             else
             {
-                ComControl.SetClearLabelColor(PayDatePickerLabel);
+                ComControl.SetClearLabelColor(DatePickerLabel);
             }
 
             // 担当者

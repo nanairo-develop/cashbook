@@ -99,7 +99,7 @@
         private void SetDayCombo(DateTime dateTime)
         {
             Day.Items.Clear();
-            TimeSpan subst = new TimeSpan(1, 0, 0, 0);
+            TimeSpan subst = new(1, 0, 0, 0);
             int dayCount = (new DateTime(IntYear, IntMonth + 1, 1) - subst).Day;
             for (int i = 1; i <= dayCount; i++)
             {

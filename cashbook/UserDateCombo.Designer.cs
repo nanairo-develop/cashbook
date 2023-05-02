@@ -39,34 +39,34 @@
             // Year
             // 
             Year.FormattingEnabled = true;
-            Year.Location = new Point(12, 10);
+            Year.Location = new Point(0, 0);
             Year.Name = "Year";
-            Year.Size = new Size(66, 23);
+            Year.Size = new Size(59, 23);
             Year.TabIndex = 0;
             Year.SelectedIndexChanged += Year_SelectedIndexChanged;
             // 
             // Month
             // 
             Month.FormattingEnabled = true;
-            Month.Location = new Point(102, 10);
+            Month.Location = new Point(83, 0);
             Month.Name = "Month";
-            Month.Size = new Size(66, 23);
+            Month.Size = new Size(45, 23);
             Month.TabIndex = 1;
             Month.SelectedIndexChanged += Month_SelectedIndexChanged;
             // 
             // Day
             // 
             Day.FormattingEnabled = true;
-            Day.Location = new Point(192, 10);
+            Day.Location = new Point(152, 0);
             Day.Name = "Day";
-            Day.Size = new Size(66, 23);
+            Day.Size = new Size(45, 23);
             Day.TabIndex = 2;
             Day.SelectedIndexChanged += Day_SelectedIndexChanged;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(84, 13);
+            label1.Location = new Point(65, 3);
             label1.Name = "label1";
             label1.Size = new Size(12, 15);
             label1.TabIndex = 3;
@@ -75,7 +75,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(174, 13);
+            label2.Location = new Point(134, 3);
             label2.Name = "label2";
             label2.Size = new Size(12, 15);
             label2.TabIndex = 4;
@@ -83,7 +83,7 @@
             // 
             // DatePicker
             // 
-            DatePicker.Location = new Point(8, 7);
+            DatePicker.Location = new Point(203, 0);
             DatePicker.MaxDate = new DateTime(2030, 12, 31, 0, 0, 0, 0);
             DatePicker.MinDate = new DateTime(2020, 1, 1, 0, 0, 0, 0);
             DatePicker.Name = "DatePicker";
@@ -102,7 +102,7 @@
             Controls.Add(Year);
             Controls.Add(DatePicker);
             Name = "UserDateCombo";
-            Size = new Size(270, 40);
+            Size = new Size(406, 23);
             Load += UserDateCombo_Load;
             ResumeLayout(false);
             PerformLayout();

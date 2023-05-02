@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-            PayDatePickerLabel = new Label();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DatePickerLabel = new Label();
             ComboOfficeLabel = new Label();
             ComboManagerLabel = new Label();
             ComboManager = new ComboBox();
@@ -48,14 +48,14 @@
             ((System.ComponentModel.ISupportInitialize)SumData).BeginInit();
             SuspendLayout();
             // 
-            // PayDatePickerLabel
+            // DatePickerLabel
             // 
-            PayDatePickerLabel.AutoSize = true;
-            PayDatePickerLabel.Location = new Point(12, 9);
-            PayDatePickerLabel.Name = "PayDatePickerLabel";
-            PayDatePickerLabel.Size = new Size(31, 15);
-            PayDatePickerLabel.TabIndex = 0;
-            PayDatePickerLabel.Text = "日付";
+            DatePickerLabel.AutoSize = true;
+            DatePickerLabel.Location = new Point(12, 9);
+            DatePickerLabel.Name = "DatePickerLabel";
+            DatePickerLabel.Size = new Size(31, 15);
+            DatePickerLabel.TabIndex = 0;
+            DatePickerLabel.Text = "日付";
             // 
             // ComboOfficeLabel
             // 
@@ -69,7 +69,7 @@
             // ComboManagerLabel
             // 
             ComboManagerLabel.AutoSize = true;
-            ComboManagerLabel.Location = new Point(472, 9);
+            ComboManagerLabel.Location = new Point(460, 9);
             ComboManagerLabel.Name = "ComboManagerLabel";
             ComboManagerLabel.Size = new Size(43, 15);
             ComboManagerLabel.TabIndex = 2;
@@ -95,14 +95,14 @@
             // DetailList
             // 
             DetailList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = SystemColors.Window;
-            dataGridViewCellStyle2.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            DetailList.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Window;
+            dataGridViewCellStyle1.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            DetailList.DefaultCellStyle = dataGridViewCellStyle1;
             DetailList.Location = new Point(12, 71);
             DetailList.Name = "DetailList";
             DetailList.RowTemplate.Height = 25;
@@ -182,13 +182,14 @@
             // 
             // DatePicker
             // 
-            DatePicker.IntDay = 0;
-            DatePicker.IntMonth = 0;
-            DatePicker.IntYear = 0;
-            DatePicker.Location = new Point(49, -4);
+            DatePicker.IntDay = 2;
+            DatePicker.IntMonth = 5;
+            DatePicker.IntYear = 2023;
+            DatePicker.Location = new Point(85, 6);
             DatePicker.Name = "DatePicker";
-            DatePicker.Size = new Size(270, 40);
+            DatePicker.Size = new Size(205, 23);
             DatePicker.TabIndex = 12;
+            DatePicker.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
             // 
             // FormPurchaseDetail
             // 
@@ -207,7 +208,7 @@
             Controls.Add(ComboManager);
             Controls.Add(ComboManagerLabel);
             Controls.Add(ComboOfficeLabel);
-            Controls.Add(PayDatePickerLabel);
+            Controls.Add(DatePickerLabel);
             Name = "FormPurchaseDetail";
             StartPosition = FormStartPosition.Manual;
             Text = "FormPurchaseDetail";
@@ -220,7 +221,7 @@
 
         #endregion
 
-        private Label PayDatePickerLabel;
+        private Label DatePickerLabel;
         private Label ComboOfficeLabel;
         private Label ComboManagerLabel;
         private ComboBox ComboManager;
