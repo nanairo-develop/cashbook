@@ -17,10 +17,44 @@
             get => Day.Text == string.Empty || Day.Text == "0" ? DateTime.Now.Day : int.Parse(Day.Text);
             set => Day.Text = value.ToString();
         }
+        public string TextYear
+        {
+            get => Year.Text;
+            set => Year.Text = value;
+        } 
+        public string TextMonth
+        {
+            get => Month.Text;
+            set => Month.Text = value;
+        }
+        public string TextDay
+        {
+            get => Day.Text;
+            set => Day.Text = value;
+        }
+        public DateTime DateTimeFrom
+        {
+            get; set;
+        }
 
         public DateTime Value
         {
-            get => new(IntYear, IntMonth, IntDay);
+            get
+            {
+                if (!int.TryParse(TextYear, out int year))
+                {
+                    year = DateTimeFrom.Year;
+                }
+                if (!int.TryParse(TextMonth, out int month))
+                {
+                    month = DateTimeFrom.Month;
+                }
+                if (!int.TryParse(TextDay, out int day))
+                {
+                    day = DateTimeFrom.Day;
+                }
+                return new(year, month, day);
+            }
             set
             {
                 IntYear = value.Year;
@@ -112,6 +146,27 @@
         {
             SetDayCombo(new DateTime(IntYear, IntMonth, 1));
             DatePicker.Value = new(IntYear, IntMonth, 1);
+        }
+
+        public bool IsDispValue()
+        {
+            bool ret = true;
+            if (Year.Text == string.Empty || Month.Text == string.Empty || Day.Text == string.Empty)
+            {
+                ret = false;
+            }
+            
+            return ret;
+        }
+        public bool IsYearDisp()
+        {
+            return Year.Text == string.Empty;
+        }
+        public void SetDispValue(DateTime dateTime)
+        {
+            Year.Text = dateTime.Year.ToString();
+            Month.Text = dateTime.Month.ToString();
+            Day.Text = dateTime.Day.ToString();
         }
         #endregion メソッド
 

@@ -33,8 +33,8 @@
             Search = new Button();
             PurchaseList = new DataGridView();
             Create = new Button();
-            this.DateFrom = new UserDateCombo();
-            this.DateTo = new UserDateCombo();
+            DateFrom = new UserDateCombo();
+            DateTo = new UserDateCombo();
             ((System.ComponentModel.ISupportInitialize)PurchaseList).BeginInit();
             SuspendLayout();
             // 
@@ -91,33 +91,35 @@
             // 
             // DateFrom
             // 
-            this.DateFrom.IntDay = 2;
-            this.DateFrom.IntMonth = 5;
-            this.DateFrom.IntYear = 2023;
-            this.DateFrom.Location = new Point(357, 12);
-            this.DateFrom.Name = "DateFrom";
-            this.DateFrom.Size = new Size(203, 23);
-            this.DateFrom.TabIndex = 1;
-            this.DateFrom.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
+            DateFrom.DateTimeFrom = new DateTime(0L);
+            DateFrom.IntDay = 2;
+            DateFrom.IntMonth = 5;
+            DateFrom.IntYear = 2023;
+            DateFrom.Location = new Point(357, 12);
+            DateFrom.Name = "DateFrom";
+            DateFrom.Size = new Size(203, 23);
+            DateFrom.TabIndex = 1;
+            DateFrom.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
             // 
             // DateTo
             // 
-            this.DateTo.IntDay = 2;
-            this.DateTo.IntMonth = 5;
-            this.DateTo.IntYear = 2023;
-            this.DateTo.Location = new Point(588, 12);
-            this.DateTo.Name = "DateTo";
-            this.DateTo.Size = new Size(203, 23);
-            this.DateTo.TabIndex = 2;
-            this.DateTo.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
+            DateTo.DateTimeFrom = new DateTime(0L);
+            DateTo.IntDay = 2;
+            DateTo.IntMonth = 5;
+            DateTo.IntYear = 2023;
+            DateTo.Location = new Point(588, 12);
+            DateTo.Name = "DateTo";
+            DateTo.Size = new Size(203, 23);
+            DateTo.TabIndex = 2;
+            DateTo.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
             // 
             // FormPurchaseList
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(this.DateTo);
-            Controls.Add(this.DateFrom);
+            Controls.Add(DateTo);
+            Controls.Add(DateFrom);
             Controls.Add(Create);
             Controls.Add(PurchaseList);
             Controls.Add(Search);
@@ -125,6 +127,7 @@
             Controls.Add(label1);
             Name = "FormPurchaseList";
             Text = "伝票一覧-FormPurchaseList";
+            Load += FormPurchaseList_Load;
             ((System.ComponentModel.ISupportInitialize)PurchaseList).EndInit();
             ResumeLayout(false);
             PerformLayout();

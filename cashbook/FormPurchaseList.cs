@@ -19,6 +19,7 @@ namespace cashbook
         {
 
             // データグリッドに表示させる
+            DateTo.DateTimeFrom = DateFrom.Value;
             PurchaseList.DataSource = GetPurchases();
             PurchaseList.Columns["id"].HeaderText = "ID";
             PurchaseList.Columns["id"].Width = 40;
@@ -90,5 +91,13 @@ namespace cashbook
             return dt;
         }
         #endregion メソッド
+
+        private void FormPurchaseList_Load(object sender, EventArgs e)
+        {
+            DateFrom.Value = DateTime.Now;
+            DateTo.TextYear = string.Empty;
+            DateTo.TextMonth = string.Empty;
+            DateTo.TextDay = string.Empty;
+        }
     }
 }
