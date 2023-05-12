@@ -2,11 +2,17 @@ using cashbook.common;
 using MySqlConnector;
 using System.Data;
 using static cashbook.FormPurchaseListDao;
+using static cashbook.dao.MManagerDao;
+using static cashbook.dao.MOfficeDao;
 
 namespace cashbook
 {
     public partial class FormPurchaseList : Form
     {
+        private readonly DataTable office = new();
+        private readonly DataTable manager = new();
+
+
         #region コンストラクタ
         public FormPurchaseList()
         {
@@ -15,6 +21,38 @@ namespace cashbook
         #endregion コンストラクタ
 
         #region イベント
+        private void FormPurchaseList_Load(object sender, EventArgs e)
+        {
+            // コンボボックスの設定
+            ComControl.ComboBoxParam comboManagerParam = new()
+            {
+                dt = manager,
+                query = GetSelectManager(DateFrom.Value),
+                comboBox = ComboManager,
+                displayMember = "name",
+                valueMember = "id"
+            };
+            ComControl.SetComboBox(comboManagerParam);
+
+            ComControl.ComboBoxParam comboOfficeParam = new()
+            {
+                dt = office,
+                query = GetSelectOffice(),
+                comboBox = ComboOffice,
+                displayMember = "name",
+                valueMember = "id",
+            };
+            ComControl.SetComboBox(comboOfficeParam);
+
+            // 初期値設定
+            ComboManager.SelectedValue = 0;
+            ComboOffice.SelectedValue = 0;
+
+            DateFrom.Value = DateTime.Now;
+            DateTo.TextYear = string.Empty;
+            DateTo.TextMonth = string.Empty;
+            DateTo.TextDay = string.Empty;
+        }
         private void Search_Click(object sender, EventArgs e)
         {
 
@@ -35,23 +73,27 @@ namespace cashbook
             PurchaseList.Columns["slipNumber"].Width = 80;
         }
 
-        private void SlipList_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void PurchaseList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex == -1)
             {
-                MessageBox.Show("先頭行です");
+                _ = MessageBox.Show("先頭行です");
             }
             else
             {
-                FormPurchaseDetail formPurchaseDetail = new(
-                    id: (int)PurchaseList.Rows[e.RowIndex].Cells[0].Value,
-                    payDate: (DateTime)PurchaseList.Rows[e.RowIndex].Cells[1].Value,
-                    officeId: (int)PurchaseList.Rows[e.RowIndex].Cells[2].Value,
-                    managerId: (int)PurchaseList.Rows[e.RowIndex].Cells[4].Value,
-                    slipNumber: (string)PurchaseList.Rows[e.RowIndex].Cells[6].Value
-                    );
+                FormPurchaseDetail.Param param = new()
+                {
+                    id = (int)PurchaseList.Rows[e.RowIndex].Cells[0].Value,
+                    payDate = (DateTime)PurchaseList.Rows[e.RowIndex].Cells[1].Value,
+                    officeId = (int)PurchaseList.Rows[e.RowIndex].Cells[2].Value,
+                    managerId = (int)PurchaseList.Rows[e.RowIndex].Cells[4].Value,
+                    slipNumber = (string)PurchaseList.Rows[e.RowIndex].Cells[6].Value,
+                    memo = PurchaseList.Rows[e.RowIndex].Cells[7].Value ?? string.Empty
+                };
+                FormPurchaseDetail formPurchaseDetail = new(param);
                 formPurchaseDetail.Show();
             }
+
         }
 
         private void Create_Click(object sender, EventArgs e)
@@ -59,6 +101,12 @@ namespace cashbook
             FormPurchaseDetail formPurchaseDetail = new();
             formPurchaseDetail.Show();
         }
+
+        private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
+        {
+            ComControl.Combo_KeyDown(office, ComboOffice);
+        }
+
         #endregion イベント
         #region メソッド
         private DataTable GetPurchases()
@@ -73,7 +121,14 @@ namespace cashbook
             {
                 // 接続を開く
                 conn.Open();
-                command.CommandText = GetSelectPurchase(DateFrom.Value, DateTo.Value);
+                FormPurchaseListDto formPurchaseListDto = new()
+                {
+                    OfficeId = (int?)ComboOffice.SelectedValue ?? 0,
+                    ManagerId = (int?)ComboManager.SelectedValue ?? 0,
+                    PayDateFrom = DateFrom.Value,
+                    PayDateTo = DateTo.Value
+                };
+                command.CommandText = GetSelectPurchase(formPurchaseListDto);
                 command.Connection = conn;
                 adapter.SelectCommand = command;
 
@@ -92,12 +147,5 @@ namespace cashbook
         }
         #endregion メソッド
 
-        private void FormPurchaseList_Load(object sender, EventArgs e)
-        {
-            DateFrom.Value = DateTime.Now;
-            DateTo.TextYear = string.Empty;
-            DateTo.TextMonth = string.Empty;
-            DateTo.TextDay = string.Empty;
-        }
     }
 }

@@ -1,15 +1,26 @@
 ﻿using cashbook.common;
 using MySqlConnector;
 using System.Data;
+using static cashbook.common.ComConst.Mode;
 
 namespace cashbook
 {
     public partial class FormOfficeList : Form
     {
+        /// <summary>
+        /// 0:編集, 1:選択
+        /// </summary>
+        public int Mode { get; set; }
         public FormOfficeList()
         {
             InitializeComponent();
         }
+        public FormOfficeList(int mode)
+        {
+            InitializeComponent();
+            Mode = mode;
+        }
+
 
         private void Search_Click(object sender, EventArgs e)
         {
@@ -73,20 +84,28 @@ namespace cashbook
             return query;
         }
 
-        private void OfficeList_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void OfficeList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex == -1)
             {
-                MessageBox.Show("先頭行です");
+                _ = MessageBox.Show("先頭行です");
             }
             else
             {
-                FormOfficeDetail formOfficeDetail = new(
-                    id: (int)OfficeList.Rows[e.RowIndex].Cells[0].Value,
-                    officeName: (string)OfficeList.Rows[e.RowIndex].Cells[1].Value,
-                    displayOrder: OfficeList.Rows[e.RowIndex].Cells[2].Value ?? ""
-                    );
-                formOfficeDetail.Show();
+                if (Mode == edit)
+                {
+                    FormOfficeDetail.Param param;
+                    param.id = (int)OfficeList.Rows[e.RowIndex].Cells[0].Value;
+                    param.officeName = (string)OfficeList.Rows[e.RowIndex].Cells[1].Value;
+                    param.displayOrder = OfficeList.Rows[e.RowIndex].Cells[2].Value ?? string.Empty;
+                    FormOfficeDetail formOfficeDetail = new(param);
+                    formOfficeDetail.Show();
+
+                }
+                else if (Mode == select)
+                {
+
+                }
             }
 
         }

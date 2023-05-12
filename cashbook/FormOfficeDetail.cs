@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace cashbook
+﻿namespace cashbook
 {
     public partial class FormOfficeDetail : Form
     {
+        public struct Param
+        {
+            public int id;
+            public string officeName;
+            public object displayOrder;
+        }
+
         public FormOfficeDetail()
         {
             InitializeComponent();
@@ -19,12 +16,12 @@ namespace cashbook
             Change.Enabled = false;
 
         }
-        public FormOfficeDetail(int id, string officeName, object displayOrder)
+        public FormOfficeDetail(Param param)
         {
             InitializeComponent();
-            Id.Text = id.ToString();
-            OfficeName.Text = officeName;
-            Order.Text = displayOrder.ToString();
+            Id.Text = param.id.ToString();
+            OfficeName.Text = param.officeName;
+            Order.Text = param.displayOrder.ToString();
             Insert.Enabled = false;
             Change.Enabled = true;
         }

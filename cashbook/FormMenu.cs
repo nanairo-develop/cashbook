@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using static cashbook.common.ComConst.Mode;
 
 namespace cashbook
 {
@@ -31,7 +23,7 @@ namespace cashbook
 
         private void OfficeList_Click(object sender, EventArgs e)
         {
-            FormOfficeList formOfficeList = new();
+            FormOfficeList formOfficeList = new(edit);
             formOfficeList.Show();
         }
     }

@@ -4,7 +4,11 @@ using MySqlConnector;
 using System.Data;
 using System.Diagnostics;
 using System.Globalization;
-using static cashbook.FormPurchaseDetailDao;
+using static cashbook.common.ComConst.Mode;
+using static cashbook.dao.MManagerDao;
+using static cashbook.dao.MOfficeDao;
+using static cashbook.dao.TPurchaseDao;
+using static cashbook.dao.TPurchaseDetailDao;
 
 namespace cashbook
 {
@@ -29,6 +33,15 @@ namespace cashbook
             payable,
             useforfood
         }
+        public struct Param
+        {
+            public int id;
+            public DateTime payDate;
+            public int officeId;
+            public int managerId;
+            public string slipNumber;
+            public object memo;
+        }
 
         #region コンストラクタ
         public FormPurchaseDetail()
@@ -40,14 +53,15 @@ namespace cashbook
             Change.Enabled = false;
         }
 
-        public FormPurchaseDetail(int id, DateTime payDate, int officeId, int managerId, string slipNumber)
+        public FormPurchaseDetail(Param param)
         {
             InitializeComponent();
-            purchaseId = id;
-            DatePicker.Value = payDate;
-            this.managerId = managerId;
-            this.officeId = officeId;
-            SlipNumber.Text = slipNumber;
+            purchaseId = param.id;
+            DatePicker.Value = param.payDate;
+            managerId = param.managerId;
+            officeId = param.officeId;
+            SlipNumber.Text = param.slipNumber;
+            Memo.Text = param.memo.ToString();
             Insert.Enabled = false;
             Change.Enabled = true;
         }
@@ -57,11 +71,21 @@ namespace cashbook
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
             // コンボボックスの設定
-            string selectManager = GetSelectManager(DatePicker.Value);
-            SetComboBox(manager, selectManager, ComboManager, "name", "id");
+            ComControl.ComboBoxParam comboManager;
+            comboManager.dt = manager;
+            comboManager.query = GetSelectManager(DatePicker.Value);
+            comboManager.comboBox = ComboManager;
+            comboManager.displayMember = "name";
+            comboManager.valueMember = "id";
+            ComControl.SetComboBox(comboManager);
 
-            string selectOffice = GetSelectOffice();
-            SetComboBox(office, selectOffice, ComboOffice, "name", "id");
+            ComControl.ComboBoxParam comboOffice;
+            comboOffice.dt = office;
+            comboOffice.query = GetSelectOffice();
+            comboOffice.comboBox = ComboOffice;
+            comboOffice.displayMember = "name";
+            comboOffice.valueMember = "id";
+            ComControl.SetComboBox(comboOffice);
 
             SetDetailList();
 
@@ -69,7 +93,7 @@ namespace cashbook
             ComboOffice.SelectedValue = officeId;
 
             SumData.AllowUserToAddRows = false;
-            SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
+            _ = SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
             //SumData[(int)DataSumColumns.receivableSum, 0].Value = SumAmount((int)DetailListColumns.receivable);
             SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Format = "c";
@@ -125,16 +149,13 @@ namespace cashbook
         }
         private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
         {
-            //コンボボックスのデータの更新の為
-            DataView dv = office.DefaultView;
-            //コンボボックスに入力された文字列でフィルター
-            dv.RowFilter = "name LIKE '*" + ComboOffice.Text + "*'";
+            ComControl.Combo_KeyDown(office, ComboOffice);
         }
 
         private void Insert_Click(object sender, EventArgs e)
         {
             // MessageAreaの初期化
-            MessageArea.Text = "";
+            MessageArea.Text = string.Empty;
             // チェック処理
             if (!CheckValid())
             {
@@ -150,9 +171,20 @@ namespace cashbook
 
         }
 
+        private void OfficeSelect_Click(object sender, EventArgs e)
+        {
+            FormOfficeList formOfficeList = new(edit);
+            formOfficeList.Show();
+        }
+
         #endregion イベント
 
         #region メソッド
+        /// <summary>
+        /// 指令された列の合計を出力する
+        /// </summary>
+        /// <param name="col">売掛列か買掛列か/param>
+        /// <returns>指定された列の合計</returns>
         private int SumAmount(int col)
         {
             int sum = 0;
@@ -164,40 +196,6 @@ namespace cashbook
         }
 
         #region 検索処理
-        /// <summary>
-        /// コンボボックスの選択候補をDBから設定する
-        /// </summary>
-        /// <param name="dt"></param>
-        /// <param name="query"></param>
-        /// <param name="comboBox"></param>
-        /// <param name="displayMember"></param>
-        /// <param name="valueMember"></param>
-        private static void SetComboBox(
-            DataTable dt,
-            string query,
-            ComboBox comboBox,
-            string displayMember,
-            string valueMember)
-        {
-            MySqlConnection conn = new(ComConst.connStr);
-
-            // 接続を開く
-            conn.Open();
-
-            // コンボボックスの設定
-            DataTable combo = dt;
-
-            MySqlDataAdapter dataAdapter = new(query, conn);
-            _ = dataAdapter.Fill(combo);
-
-            // テキストフィルターを実装するため、DataViewを経由する
-            DataView dv = combo.DefaultView;
-
-            comboBox.DataSource = dv;
-            comboBox.DisplayMember = displayMember;
-            comboBox.ValueMember = valueMember;
-
-        }
 
         private void SetDetailList()
         {
@@ -290,12 +288,19 @@ namespace cashbook
 
         private void InsertPurchase(MySqlConnection conn, MySqlTransaction transaction)
         {
-            TPurchaseDto tPurchaseDto = new(
-                DatePicker.Value,
-                ComboOffice.SelectedValue,
-                ComboManager.SelectedValue,
-                SlipNumber.Text);
-            string query = GetPurchaseInsert(tPurchaseDto);
+            //TPurchaseDto purchaseDto = new(
+            //    DatePicker.Value,
+            //    ComboOffice.SelectedValue,
+            //    ComboManager.SelectedValue,
+            //    SlipNumber.Text,
+            //    Memo.Text);
+            TPurchaseDto purchaseDto = new(ComboOffice.SelectedValue, ComboManager.SelectedValue)
+            {
+                PayDate = DatePicker.Value,
+                SlipNumber = SlipNumber.Text,
+                Memo = Memo.Text
+            };
+            string query = GetInsertPurchase(purchaseDto);
 
             using MySqlCommand command = conn.CreateCommand();
             command.CommandText = query;
@@ -320,18 +325,28 @@ namespace cashbook
                 }
                 else
                 {
-                    purchaseDetailDtos.Add(new(
-                        purchaseId: purchaseId,
-                        branchId: (sbyte)rows.Cells[0].Value,
-                        description: (string)rows.Cells[1].Value,
-                        receivable: (int)rows.Cells[2].Value,
-                        payable: (int)rows.Cells[3].Value,
-                        useForFood: (bool)rows.Cells[4].Value));
+                    TPurchaseDetailDto purchaseDetailDto = new()
+                    {
+                        PurchaseId = purchaseId,
+                        BranchId = (sbyte)rows.Cells[0].Value,
+                        Description = (string)rows.Cells[1].Value,
+                        Receivable = (int)rows.Cells[2].Value,
+                        Payable = (int)rows.Cells[3].Value,
+                        UseForFood = (bool)rows.Cells[4].Value
+                    };
+                    purchaseDetailDtos.Add(purchaseDetailDto);
+                    //purchaseDetailDtos.Add(new(
+                    //    purchaseId: purchaseId,
+                    //    branchId: (sbyte)rows.Cells[0].Value,
+                    //    description: (string)rows.Cells[1].Value,
+                    //    receivable: (int)rows.Cells[2].Value,
+                    //    payable: (int)rows.Cells[3].Value,
+                    //    useForFood: (bool)rows.Cells[4].Value));
                 }
             }
 
             using MySqlCommand command = conn.CreateCommand();
-            command.CommandText = GetInsertPurchaseDetail(purchaseDetailDtos);
+            command.CommandText = GetInsertPurchaseDetails(purchaseDetailDtos);
             command.Transaction = transaction;
 
             int result = command.ExecuteNonQuery();
@@ -353,7 +368,7 @@ namespace cashbook
             if (DatePicker.Value > DateTime.Now)
             {
                 ComControl.SetErrorLabelColor(DatePickerLabel);
-                MessageArea.Text += "";
+                MessageArea.Text += string.Empty;
                 ret = false;
             }
             else
@@ -437,8 +452,8 @@ namespace cashbook
             }
             return ret;
         }
+
         #endregion チェック処理
         #endregion メソッド
-
     }
 }

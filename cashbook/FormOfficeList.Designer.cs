@@ -44,7 +44,7 @@
             OfficeList.RowTemplate.Height = 25;
             OfficeList.Size = new Size(473, 282);
             OfficeList.TabIndex = 0;
-            OfficeList.CellContentClick += OfficeList_CellContentClick;
+            OfficeList.CellDoubleClick += OfficeList_CellDoubleClick;
             // 
             // label1
             // 
@@ -57,6 +57,7 @@
             // 
             // OfficeName
             // 
+            OfficeName.ImeMode = ImeMode.Hiragana;
             OfficeName.Location = new Point(85, 12);
             OfficeName.Name = "OfficeName";
             OfficeName.Size = new Size(195, 23);

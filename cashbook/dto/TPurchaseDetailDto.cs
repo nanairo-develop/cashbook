@@ -9,6 +9,10 @@
         public int Payable { get; set; }
         public bool UseForFood { get; set; }
 
+        public TPurchaseDetailDto()
+        {
+            Description ??= string.Empty;
+        }
         public TPurchaseDetailDto(int purchaseId, int branchId, string description, int receivable, int payable, bool useForFood)
         {
             PurchaseId = purchaseId;

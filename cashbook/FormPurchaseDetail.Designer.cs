@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DatePickerLabel = new Label();
             ComboOfficeLabel = new Label();
             ComboManagerLabel = new Label();
@@ -44,6 +44,8 @@
             Change = new Button();
             MessageArea = new TextBox();
             DatePicker = new UserDateCombo();
+            Memo = new TextBox();
+            OfficeSelect = new Button();
             ((System.ComponentModel.ISupportInitialize)DetailList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SumData).BeginInit();
             SuspendLayout();
@@ -95,18 +97,18 @@
             // DetailList
             // 
             DetailList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = SystemColors.Window;
-            dataGridViewCellStyle1.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
-            DetailList.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            DetailList.DefaultCellStyle = dataGridViewCellStyle2;
             DetailList.Location = new Point(12, 71);
             DetailList.Name = "DetailList";
             DetailList.RowTemplate.Height = 25;
-            DetailList.Size = new Size(776, 227);
+            DetailList.Size = new Size(674, 227);
             DetailList.TabIndex = 5;
             DetailList.CellEnter += DetailList_CellEnter;
             DetailList.CellValidating += DetailList_CellValidating;
@@ -116,10 +118,10 @@
             SumData.AllowUserToDeleteRows = false;
             SumData.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             SumData.Columns.AddRange(new DataGridViewColumn[] { SumReceivable, 支払合計 });
-            SumData.Location = new Point(241, 304);
+            SumData.Location = new Point(358, 304);
             SumData.Name = "SumData";
             SumData.RowTemplate.Height = 25;
-            SumData.Size = new Size(283, 54);
+            SumData.Size = new Size(247, 54);
             SumData.TabIndex = 7;
             // 
             // SumReceivable
@@ -162,7 +164,7 @@
             // 
             // Change
             // 
-            Change.Location = new Point(530, 304);
+            Change.Location = new Point(611, 333);
             Change.Name = "Change";
             Change.Size = new Size(75, 23);
             Change.TabIndex = 6;
@@ -182,6 +184,7 @@
             // 
             // DatePicker
             // 
+            DatePicker.DateTimeFrom = new DateTime(0L);
             DatePicker.IntDay = 2;
             DatePicker.IntMonth = 5;
             DatePicker.IntYear = 2023;
@@ -189,13 +192,37 @@
             DatePicker.Name = "DatePicker";
             DatePicker.Size = new Size(205, 23);
             DatePicker.TabIndex = 12;
+            DatePicker.TextDay = "2";
+            DatePicker.TextMonth = "5";
+            DatePicker.TextYear = "2023";
             DatePicker.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
+            // 
+            // Memo
+            // 
+            Memo.Location = new Point(12, 304);
+            Memo.Multiline = true;
+            Memo.Name = "Memo";
+            Memo.ScrollBars = ScrollBars.Vertical;
+            Memo.Size = new Size(340, 54);
+            Memo.TabIndex = 13;
+            // 
+            // OfficeSelect
+            // 
+            OfficeSelect.Location = new Point(376, 42);
+            OfficeSelect.Name = "OfficeSelect";
+            OfficeSelect.Size = new Size(75, 23);
+            OfficeSelect.TabIndex = 14;
+            OfficeSelect.Text = "選択";
+            OfficeSelect.UseVisualStyleBackColor = true;
+            OfficeSelect.Click += OfficeSelect_Click;
             // 
             // FormPurchaseDetail
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(700, 450);
+            Controls.Add(OfficeSelect);
+            Controls.Add(Memo);
             Controls.Add(DatePicker);
             Controls.Add(MessageArea);
             Controls.Add(Change);
@@ -237,5 +264,7 @@
         private Label MessageLabel;
         private TextBox MessageArea;
         private UserDateCombo DatePicker;
+        private TextBox Memo;
+        private Button OfficeSelect;
     }
 }
