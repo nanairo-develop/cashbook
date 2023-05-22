@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DatePickerLabel = new Label();
             ComboOfficeLabel = new Label();
             ComboManagerLabel = new Label();
@@ -97,14 +97,14 @@
             // DetailList
             // 
             DetailList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = SystemColors.Window;
-            dataGridViewCellStyle2.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-            DetailList.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Window;
+            dataGridViewCellStyle1.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
+            DetailList.DefaultCellStyle = dataGridViewCellStyle1;
             DetailList.Location = new Point(12, 71);
             DetailList.Name = "DetailList";
             DetailList.RowTemplate.Height = 25;
@@ -239,6 +239,7 @@
             Name = "FormPurchaseDetail";
             StartPosition = FormStartPosition.Manual;
             Text = "FormPurchaseDetail";
+            Activated += FormPurchaseDetail_Activated;
             Load += FormPurchaseDetail_Load;
             ((System.ComponentModel.ISupportInitialize)DetailList).EndInit();
             ((System.ComponentModel.ISupportInitialize)SumData).EndInit();
@@ -261,7 +262,6 @@
         private TextBox SlipNumber;
         private Label SlipNumberLabel;
         private Button Change;
-        private Label MessageLabel;
         private TextBox MessageArea;
         private UserDateCombo DatePicker;
         private TextBox Memo;

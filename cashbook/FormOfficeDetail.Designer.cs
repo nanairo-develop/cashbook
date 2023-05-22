@@ -1,4 +1,6 @@
-﻿namespace cashbook
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace cashbook
 {
     partial class FormOfficeDetail
     {
@@ -28,25 +30,26 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
+            OfficeNameLabel = new Label();
             OfficeName = new TextBox();
             Order = new TextBox();
-            label2 = new Label();
+            OrderLabel = new Label();
             Change = new Button();
             Insert = new Button();
             label3 = new Label();
             label4 = new Label();
             Id = new TextBox();
+            MessageArea = new TextBox();
             SuspendLayout();
             // 
-            // label1
+            // OfficeNameLabel
             // 
-            label1.AutoSize = true;
-            label1.Location = new Point(56, 77);
-            label1.Name = "label1";
-            label1.Size = new Size(31, 15);
-            label1.TabIndex = 0;
-            label1.Text = "名称";
+            OfficeNameLabel.AutoSize = true;
+            OfficeNameLabel.Location = new Point(56, 77);
+            OfficeNameLabel.Name = "OfficeNameLabel";
+            OfficeNameLabel.Size = new Size(31, 15);
+            OfficeNameLabel.TabIndex = 0;
+            OfficeNameLabel.Text = "名称";
             // 
             // OfficeName
             // 
@@ -54,6 +57,7 @@
             OfficeName.Name = "OfficeName";
             OfficeName.Size = new Size(200, 23);
             OfficeName.TabIndex = 1;
+            OfficeName.Leave += OfficeName_Leave;
             // 
             // Order
             // 
@@ -62,15 +66,16 @@
             Order.Name = "Order";
             Order.Size = new Size(200, 23);
             Order.TabIndex = 2;
+            Order.Leave += Order_Leave;
             // 
-            // label2
+            // OrderLabel
             // 
-            label2.AutoSize = true;
-            label2.Location = new Point(56, 134);
-            label2.Name = "label2";
-            label2.Size = new Size(41, 15);
-            label2.TabIndex = 3;
-            label2.Text = "並び順";
+            OrderLabel.AutoSize = true;
+            OrderLabel.Location = new Point(56, 134);
+            OrderLabel.Name = "OrderLabel";
+            OrderLabel.Size = new Size(41, 15);
+            OrderLabel.TabIndex = 3;
+            OrderLabel.Text = "並び順";
             // 
             // Change
             // 
@@ -80,13 +85,14 @@
             Change.TabIndex = 4;
             Change.Text = "変更";
             Change.UseVisualStyleBackColor = true;
+            Change.Click += Change_Click;
             // 
             // Insert
             // 
             Insert.Location = new Point(203, 180);
             Insert.Name = "Insert";
             Insert.Size = new Size(75, 23);
-            Insert.TabIndex = 5;
+            Insert.TabIndex = 3;
             Insert.Text = "登録";
             Insert.UseVisualStyleBackColor = true;
             Insert.Click += Insert_Click;
@@ -116,20 +122,32 @@
             Id.Size = new Size(200, 23);
             Id.TabIndex = 8;
             // 
+            // MessageArea
+            // 
+            MessageArea.BackColor = Color.NavajoWhite;
+            MessageArea.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            MessageArea.Location = new Point(12, 364);
+            MessageArea.Multiline = true;
+            MessageArea.Name = "MessageArea";
+            MessageArea.ScrollBars = ScrollBars.Vertical;
+            MessageArea.Size = new Size(674, 74);
+            MessageArea.TabIndex = 12;
+            // 
             // FormOfficeDetail
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(MessageArea);
             Controls.Add(Id);
             Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(Insert);
             Controls.Add(Change);
-            Controls.Add(label2);
+            Controls.Add(OrderLabel);
             Controls.Add(Order);
             Controls.Add(OfficeName);
-            Controls.Add(label1);
+            Controls.Add(OfficeNameLabel);
             Name = "FormOfficeDetail";
             Text = "FormOfficeDetail";
             Load += FormOfficeDetail_Load;
@@ -139,14 +157,15 @@
 
         #endregion
 
-        private Label label1;
+        private Label OfficeNameLabel;
         private TextBox OfficeName;
         private TextBox Order;
-        private Label label2;
+        private Label OrderLabel;
         private Button Change;
         private Button Insert;
         private Label label3;
         private Label label4;
         private TextBox Id;
+        private TextBox MessageArea;
     }
 }

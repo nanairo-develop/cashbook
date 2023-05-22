@@ -32,7 +32,7 @@
             label1 = new Label();
             OfficeName = new TextBox();
             Search = new Button();
-            button2 = new Button();
+            Create = new Button();
             ((System.ComponentModel.ISupportInitialize)OfficeList).BeginInit();
             SuspendLayout();
             // 
@@ -62,6 +62,8 @@
             OfficeName.Name = "OfficeName";
             OfficeName.Size = new Size(195, 23);
             OfficeName.TabIndex = 2;
+            OfficeName.KeyUp += OfficeName_KeyUp;
+            OfficeName.Leave += OfficeName_Leave;
             // 
             // Search
             // 
@@ -73,27 +75,29 @@
             Search.UseVisualStyleBackColor = true;
             Search.Click += Search_Click;
             // 
-            // button2
+            // Create
             // 
-            button2.Location = new Point(399, 11);
-            button2.Name = "button2";
-            button2.Size = new Size(75, 23);
-            button2.TabIndex = 4;
-            button2.Text = "button2";
-            button2.UseVisualStyleBackColor = true;
+            Create.Location = new Point(399, 11);
+            Create.Name = "Create";
+            Create.Size = new Size(75, 23);
+            Create.TabIndex = 4;
+            Create.Text = "新規登録";
+            Create.UseVisualStyleBackColor = true;
+            Create.Click += Create_Click;
             // 
             // FormOfficeList
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
-            Controls.Add(button2);
+            Controls.Add(Create);
             Controls.Add(Search);
             Controls.Add(OfficeName);
             Controls.Add(label1);
             Controls.Add(OfficeList);
             Name = "FormOfficeList";
             Text = "FormOfficeList";
+            Activated += FormOfficeList_Activated;
             ((System.ComponentModel.ISupportInitialize)OfficeList).EndInit();
             ResumeLayout(false);
             PerformLayout();
@@ -105,6 +109,6 @@
         private Label label1;
         private TextBox OfficeName;
         private Button Search;
-        private Button button2;
+        private Button Create;
     }
 }

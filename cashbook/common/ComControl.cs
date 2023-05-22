@@ -14,6 +14,11 @@ namespace cashbook.common
         {
             label.BackColor = SystemColors.Control;
         }
+        public static void SetClearColor(List<Label> labels)
+        {
+            labels.ForEach(SetClearLabelColor);
+        }
+
         #endregion Label
 
         #region DataGridViewCellStyle

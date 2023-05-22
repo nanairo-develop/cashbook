@@ -2,6 +2,7 @@
 using MySqlConnector;
 using System.Data;
 using static cashbook.common.ComConst.Mode;
+using static cashbook.dao.MOfficeDao;
 
 namespace cashbook
 {
@@ -22,7 +23,86 @@ namespace cashbook
         }
 
 
+        #region イベント
+        private void FormOfficeList_Activated(object sender, EventArgs e)
+        {
+            // アクティブになった時にリストの行が存在すれば同じ条件で再度検索する
+            if (OfficeList.RowCount > 0)
+            {
+                SearchOffice();
+            }
+        }
+
         private void Search_Click(object sender, EventArgs e)
+        {
+            SearchOffice();
+        }
+
+        private void OfficeList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == -1)
+            {
+                _ = MessageBox.Show("先頭行です");
+            }
+            else
+            {
+                if (Mode == edit)
+                {
+                    FormOfficeDetail.Param param = new()
+                    {
+                        id = (int)OfficeList.Rows[e.RowIndex].Cells[0].Value,
+                        officeName = (string)OfficeList.Rows[e.RowIndex].Cells[1].Value,
+                        displayOrder = OfficeList.Rows[e.RowIndex].Cells[2].Value ?? string.Empty
+                    };
+                    FormOfficeDetail formOfficeDetail = new(param);
+                    formOfficeDetail.Show();
+                }
+                else if (Mode == select)
+                {
+                    FormPurchaseDetail? parentForm = (FormPurchaseDetail?)Owner;
+                    if (parentForm is not null)
+                    {
+                        parentForm.OfficeId = (int)OfficeList.Rows[e.RowIndex].Cells[0].Value;
+                    }
+                    // 選択後、画面を閉じる
+                    Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enter押下時に検索する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OfficeName_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                SearchOffice();
+            }
+        }
+
+        /// <summary>
+        /// コントロールを離れた際に検索する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OfficeName_Leave(object sender, EventArgs e)
+        {
+            SearchOffice();
+        }
+
+        private void Create_Click(object sender, EventArgs e)
+        {
+            FormOfficeDetail formOfficeDetail = new();
+            formOfficeDetail.Show();
+        }
+
+        #endregion イベント
+
+        #region メソッド
+        private void SearchOffice()
         {
 
             MySqlConnection conn = new(ComConst.connStr);
@@ -34,7 +114,7 @@ namespace cashbook
                 // データを取得するテーブル
                 DataTable tbl = new();
 
-                string query = GetQueryOffice();
+                string query = GetSelectOffice(OfficeName.Text);
 
                 // SQLを実行する
                 MySqlDataAdapter dataAdp = new(query, conn);
@@ -52,62 +132,8 @@ namespace cashbook
             {
                 _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            return;
         }
+        #endregion メソッド
 
-        private string GetQueryOffice()
-        {
-            string nameCondition = "";
-            if (OfficeName.Text != string.Empty)
-            {
-                nameCondition = $"""
-                    AND
-                        name LIKE '%{OfficeName.Text}%'
-                    """;
-            }
-            string query = $"""
-                SELECT
-                    id,
-                    name,
-                    displayOrder
-                FROM
-                    m_office
-                WHERE
-                    1 = 1
-                {nameCondition}
-                ORDER BY
-                    displayOrder DESC
-                ;
-                """;
-
-            return query;
-        }
-
-        private void OfficeList_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex == -1)
-            {
-                _ = MessageBox.Show("先頭行です");
-            }
-            else
-            {
-                if (Mode == edit)
-                {
-                    FormOfficeDetail.Param param;
-                    param.id = (int)OfficeList.Rows[e.RowIndex].Cells[0].Value;
-                    param.officeName = (string)OfficeList.Rows[e.RowIndex].Cells[1].Value;
-                    param.displayOrder = OfficeList.Rows[e.RowIndex].Cells[2].Value ?? string.Empty;
-                    FormOfficeDetail formOfficeDetail = new(param);
-                    formOfficeDetail.Show();
-
-                }
-                else if (Mode == select)
-                {
-
-                }
-            }
-
-        }
     }
 }

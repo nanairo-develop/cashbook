@@ -5,10 +5,12 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using static cashbook.common.ComConst.Mode;
+using static cashbook.common.ComControl;
 using static cashbook.dao.MManagerDao;
 using static cashbook.dao.MOfficeDao;
 using static cashbook.dao.TPurchaseDao;
 using static cashbook.dao.TPurchaseDetailDao;
+
 
 namespace cashbook
 {
@@ -16,9 +18,12 @@ namespace cashbook
     {
         private int purchaseId;
         private readonly int managerId;
-        private readonly int officeId;
+
         private readonly DataTable office = new();
         private readonly DataTable manager = new();
+
+        public int OfficeId { get; set; }
+        public bool Wait { get; set; }
 
         private enum DataSumColumns
         {
@@ -48,9 +53,10 @@ namespace cashbook
         {
             InitializeComponent();
             managerId = 0;
-            officeId = 0;
+            OfficeId = 0;
             Insert.Enabled = true;
             Change.Enabled = false;
+            Wait = false;
         }
 
         public FormPurchaseDetail(Param param)
@@ -59,11 +65,12 @@ namespace cashbook
             purchaseId = param.id;
             DatePicker.Value = param.payDate;
             managerId = param.managerId;
-            officeId = param.officeId;
+            OfficeId = param.officeId;
             SlipNumber.Text = param.slipNumber;
             Memo.Text = param.memo.ToString();
             Insert.Enabled = false;
             Change.Enabled = true;
+            Wait = false;
         }
         #endregion コンストラクタ
 
@@ -71,26 +78,30 @@ namespace cashbook
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
             // コンボボックスの設定
-            ComControl.ComboBoxParam comboManager;
-            comboManager.dt = manager;
-            comboManager.query = GetSelectManager(DatePicker.Value);
-            comboManager.comboBox = ComboManager;
-            comboManager.displayMember = "name";
-            comboManager.valueMember = "id";
-            ComControl.SetComboBox(comboManager);
+            ComboBoxParam comboManager = new()
+            {
+                dt = manager,
+                query = GetSelectManager(DatePicker.Value),
+                comboBox = ComboManager,
+                displayMember = "name",
+                valueMember = "id"
+            };
+            SetComboBox(comboManager);
 
-            ComControl.ComboBoxParam comboOffice;
-            comboOffice.dt = office;
-            comboOffice.query = GetSelectOffice();
-            comboOffice.comboBox = ComboOffice;
-            comboOffice.displayMember = "name";
-            comboOffice.valueMember = "id";
-            ComControl.SetComboBox(comboOffice);
+            ComboBoxParam comboOffice = new()
+            {
+                dt = office,
+                query = GetSelectOffice(),
+                comboBox = ComboOffice,
+                displayMember = "name",
+                valueMember = "id"
+            };
+            SetComboBox(comboOffice);
 
             SetDetailList();
 
             ComboManager.SelectedValue = managerId;
-            ComboOffice.SelectedValue = officeId;
+            ComboOffice.SelectedValue = OfficeId;
 
             SumData.AllowUserToAddRows = false;
             _ = SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
@@ -102,6 +113,15 @@ namespace cashbook
             SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Format = "c";
 
+        }
+
+        private void FormPurchaseDetail_Activated(object sender, EventArgs e)
+        {
+            if (Wait)
+            {
+                ComboOffice.SelectedValue = OfficeId;
+            }
+            Wait = false;
         }
 
         private void DetailList_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
@@ -149,7 +169,7 @@ namespace cashbook
         }
         private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
         {
-            ComControl.Combo_KeyDown(office, ComboOffice);
+            Combo_KeyDown(office, ComboOffice);
         }
 
         private void Insert_Click(object sender, EventArgs e)
@@ -157,7 +177,7 @@ namespace cashbook
             // MessageAreaの初期化
             MessageArea.Text = string.Empty;
             // チェック処理
-            if (!CheckValid())
+            if (!IsValidation())
             {
                 return;
             };
@@ -173,8 +193,9 @@ namespace cashbook
 
         private void OfficeSelect_Click(object sender, EventArgs e)
         {
-            FormOfficeList formOfficeList = new(edit);
-            formOfficeList.Show();
+            Wait = true;
+            FormOfficeList formOfficeList = new(select);
+            formOfficeList.Show(this);
         }
 
         #endregion イベント
@@ -360,56 +381,56 @@ namespace cashbook
         #endregion 更新処理
 
         #region チェック処理
-        private bool CheckValid()
+        private bool IsValidation()
         {
             bool ret = true;
             // 日付
             // 未来日付はNG
             if (DatePicker.Value > DateTime.Now)
             {
-                ComControl.SetErrorLabelColor(DatePickerLabel);
+                SetErrorLabelColor(DatePickerLabel);
                 MessageArea.Text += string.Empty;
                 ret = false;
             }
             else
             {
-                ComControl.SetClearLabelColor(DatePickerLabel);
+                SetClearLabelColor(DatePickerLabel);
             }
 
             // 担当者
             // 担当者指定なしはNG
             if (ComboManager.SelectedValue == null)
             {
-                ComControl.SetErrorLabelColor(ComboManagerLabel);
+                SetErrorLabelColor(ComboManagerLabel);
                 ret = false;
             }
             else
             {
-                ComControl.SetClearLabelColor(ComboManagerLabel);
+                SetClearLabelColor(ComboManagerLabel);
             }
 
             // 相手先
             // 相手先指定なしはNG
             if (ComboOffice.SelectedValue == null)
             {
-                ComControl.SetErrorLabelColor(ComboOfficeLabel);
+                SetErrorLabelColor(ComboOfficeLabel);
                 ret = false;
             }
             else
             {
-                ComControl.SetClearLabelColor(ComboOfficeLabel);
+                SetClearLabelColor(ComboOfficeLabel);
             }
 
             // 伝票番号
             // 伝票番号無しはNG
             if (SlipNumber.Text == string.Empty)
             {
-                ComControl.SetErrorLabelColor(SlipNumberLabel);
+                SetErrorLabelColor(SlipNumberLabel);
                 ret = false;
             }
             else
             {
-                ComControl.SetClearLabelColor(SlipNumberLabel);
+                SetClearLabelColor(SlipNumberLabel);
             }
 
 
@@ -417,12 +438,12 @@ namespace cashbook
             // 件数0はNG
             if (DetailList.RowCount == 1)
             {
-                ComControl.SetErrorGridColor(DetailList.DefaultCellStyle);
+                SetErrorGridColor(DetailList.DefaultCellStyle);
                 ret = false;
             }
             else
             {
-                ComControl.SetClearGridColor(DetailList.DefaultCellStyle);
+                SetClearGridColor(DetailList.DefaultCellStyle);
             }
             // 内容無しはNG
             if (!IsExistDescription())
@@ -441,19 +462,19 @@ namespace cashbook
                 // 内容無しはNG
                 if (row.Cells[1].Value.ToString() == string.Empty)
                 {
-                    ComControl.SetErrorGridColor(row.Cells[1].Style);
+                    SetErrorGridColor(row.Cells[1].Style);
                     ret = false;
                     Debug.WriteLine("未記載");
                 }
                 else
                 {
-                    ComControl.SetClearGridColor(row.Cells[1].Style);
+                    SetClearGridColor(row.Cells[1].Style);
                 }
             }
             return ret;
         }
-
         #endregion チェック処理
         #endregion メソッド
+
     }
 }
