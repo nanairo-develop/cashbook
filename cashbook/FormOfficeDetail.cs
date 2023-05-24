@@ -130,7 +130,7 @@ namespace cashbook
         private void OfficeName_Leave(object sender, EventArgs e)
         {
             // 名称は空白NG
-            MessageArea.Text = IsEmpty(OfficeName, OfficeNameLabel);
+            MessageArea.Text = CheckEmpty(OfficeName, OfficeNameLabel);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace cashbook
             // 空白の場合はチェックしない
             if (Order.Text != string.Empty)
             {
-                MessageArea.Text = IsInt(Order, OrderLabel);
+                MessageArea.Text = CheckInt(Order, OrderLabel);
             }
         }
         #endregion イベント

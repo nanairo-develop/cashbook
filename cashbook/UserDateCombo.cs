@@ -4,32 +4,29 @@
     {
         public int IntYear
         {
-            get => Year.Text == string.Empty || Year.Text == "0" ? DateTime.Now.Year : int.Parse(Year.Text);
-            set => Year.Text = value.ToString();
+            get => Year.Text == string.Empty ? DateTime.Now.Year : (int)Year.Value;
+            set => Year.Value = value;
         }
         public int IntMonth
         {
-            get => Month.Text == string.Empty || Month.Text == "0" ? DateTime.Now.Month : int.Parse(Month.Text);
-            set => Month.Text = value.ToString();
+            get => Month.Text == string.Empty ? DateTime.Now.Month : (int)Month.Value;
+            set => Month.Value = value;
         }
         public int IntDay
         {
-            get => Day.Text == string.Empty || Day.Text == "0" ? DateTime.Now.Day : int.Parse(Day.Text);
-            set => Day.Text = value.ToString();
+            get => Day.Text == string.Empty ? DateTime.Now.Day : (int)Day.Value;
+            set => Day.Value = value;
         }
         public string TextYear
         {
-            get => Year.Text;
             set => Year.Text = value;
-        } 
+        }
         public string TextMonth
         {
-            get => Month.Text;
             set => Month.Text = value;
         }
         public string TextDay
         {
-            get => Day.Text;
             set => Day.Text = value;
         }
         public DateTime DateTimeFrom
@@ -39,65 +36,57 @@
 
         public DateTime Value
         {
-            get
-            {
-                if (!int.TryParse(TextYear, out int year))
-                {
-                    year = DateTimeFrom.Year;
-                }
-                if (!int.TryParse(TextMonth, out int month))
-                {
-                    month = DateTimeFrom.Month;
-                }
-                if (!int.TryParse(TextDay, out int day))
-                {
-                    day = DateTimeFrom.Day;
-                }
-                return new(year, month, day);
-            }
+            get => DatePicker.Value;
             set
             {
-                IntYear = value.Year;
-                IntMonth = value.Month;
-                IntDay = value.Day;
-                DatePicker.Value = new(IntYear, IntMonth, IntDay);
+                DatePicker.Value = Value;
             }
         }
-
         #region コンストラクタ
         public UserDateCombo()
         {
             InitializeComponent();
         }
-        public UserDateCombo(int year, int month, int day)
-        {
-            InitializeComponent();
-            IntYear = year;
-            IntMonth = month;
-            IntDay = day;
-        }
-        public UserDateCombo(DateTime dateTime)
-        {
-            InitializeComponent();
-            Value = dateTime;
-        }
+        //public UserDateCombo(int year, int month, int day)
+        //{
+        //    InitializeComponent();
+        //    IntYear = year;
+        //    IntMonth = month;
+        //    IntDay = day;
+        //    ErrorMessage = string.Empty;
+        //}
+        //public UserDateCombo(DateTime dateTime)
+        //{
+        //    InitializeComponent();
+        //    Value = dateTime;
+        //    ErrorMessage = string.Empty;
+        //}
         #endregion コンストラクタ
 
         #region イベント
         private void UserDateCombo_Load(object sender, EventArgs e)
         {
-            SetDateTimeCombo(Value);
+            SetDateNumericUpdown(Value);
         }
-        private void Year_SelectedIndexChanged(object sender, EventArgs e)
+        private void Year_ValueChanged(object sender, EventArgs e)
+        {
+            // 2月の場合は年が変更された場合に末日の調整をする
+            if (IntMonth == 2)
+            {
+                YearMonth_Changed();
+            }
+            else
+            {
+                DatePicker.Value = new(IntYear, IntMonth, IntDay);
+            }
+        }
+
+        private void Month_ValueChanged(object sender, EventArgs e)
         {
             YearMonth_Changed();
         }
 
-        private void Month_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            YearMonth_Changed();
-        }
-        private void Day_SelectedIndexChanged(object sender, EventArgs e)
+        private void Day_ValueChanged(object sender, EventArgs e)
         {
             DatePicker.Value = new(IntYear, IntMonth, IntDay);
         }
@@ -105,47 +94,45 @@
         #endregion イベント
 
         #region メソッド
-        private void SetDateTimeCombo(DateTime dateTime)
+        private void SetDateNumericUpdown(DateTime dateTime)
         {
-            SetYearCombo(dateTime);
-            SetMonthCombo(dateTime);
-            SetDayCombo(dateTime);
+            SetYearNumericUpdown(dateTime);
+            SetDayNumericUpdown(dateTime.Day);
         }
 
-        private void SetYearCombo(DateTime dateTime)
+        private void SetYearNumericUpdown(DateTime dateTime)
         {
-            int minYear = DatePicker.MinDate.Year;
-            int maxYear = DatePicker.MaxDate.Year;
-            for (int i = minYear; i <= maxYear; i++)
-            {
-                _ = Year.Items.Add(i);
-            }
+            Year.Minimum = DatePicker.MinDate.Year;
+            Year.Maximum = DatePicker.MaxDate.Year;
             IntYear = dateTime.Year;
         }
-        private void SetMonthCombo(DateTime dateTime)
+        private void SetDayNumericUpdown(int intDay)
         {
-            for (int i = 1; i <= 12; i++)
-            {
-                _ = Month.Items.Add(i);
-            }
-            IntMonth = dateTime.Month;
-        }
-        private void SetDayCombo(DateTime dateTime)
-        {
-            Day.Items.Clear();
             TimeSpan subst = new(1, 0, 0, 0);
-            int dayCount = (new DateTime(IntYear, IntMonth + 1, 1) - subst).Day;
-            for (int i = 1; i <= dayCount; i++)
+            if (IntMonth < 12)
             {
-                _ = Day.Items.Add(i);
+                Day.Maximum = (new DateTime(IntYear, IntMonth + 1, 1) - subst).Day;
             }
-            IntDay = dateTime.Day;
+            else
+            {
+                Day.Maximum = 31;
+            }
+            // 年、月が変わることで末日が変わる場合、
+            // 日付として妥当な末日に置き換える
+            if (intDay <= Day.Maximum)
+            {
+                IntDay = intDay;
+            }
+            else
+            {
+                IntDay = (int)Day.Maximum;
+            }
         }
 
         private void YearMonth_Changed()
         {
-            SetDayCombo(new DateTime(IntYear, IntMonth, 1));
-            DatePicker.Value = new(IntYear, IntMonth, 1);
+            SetDayNumericUpdown(IntDay);
+            DatePicker.Value = new(IntYear, IntMonth, IntDay);
         }
 
         public bool IsDispValue()
@@ -155,20 +142,13 @@
             {
                 ret = false;
             }
-            
+
             return ret;
         }
         public bool IsYearDisp()
         {
             return Year.Text == string.Empty;
         }
-        public void SetDispValue(DateTime dateTime)
-        {
-            Year.Text = dateTime.Year.ToString();
-            Month.Text = dateTime.Month.ToString();
-            Day.Text = dateTime.Day.ToString();
-        }
         #endregion メソッド
-
     }
 }

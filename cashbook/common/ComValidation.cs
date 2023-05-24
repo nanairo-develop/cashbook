@@ -75,6 +75,7 @@ namespace cashbook.common
             return errorMessage;
         }
 
+        // TODO: 本日よりと言っていてメッセージが変
         public static string CheckGreaterThan(DateTime datetimeFirst, DateTime dateTimeSecond, Label label)
         {
             string errorMessage = string.Empty;
@@ -85,6 +86,16 @@ namespace cashbook.common
                 errorMessage = label.Text + "は本日より過去の日付を入力してください";
             }
 
+            return errorMessage;
+        }
+        public static string NoSelection(ComboBox comboBox, Label label)
+        {
+            string errorMessage = string.Empty;
+            if (comboBox.SelectedValue == null)
+            {
+                SetErrorLabelColor(label);
+                errorMessage = label.Text + "を選択してください";
+            }
             return errorMessage;
         }
 

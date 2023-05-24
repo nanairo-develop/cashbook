@@ -28,40 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            Year = new ComboBox();
-            Month = new ComboBox();
-            Day = new ComboBox();
             label1 = new Label();
             label2 = new Label();
             DatePicker = new DateTimePicker();
+            Year = new NumericUpDown();
+            Month = new NumericUpDown();
+            Day = new NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)Year).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Month).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Day).BeginInit();
             SuspendLayout();
-            // 
-            // Year
-            // 
-            Year.FormattingEnabled = true;
-            Year.Location = new Point(0, 0);
-            Year.Name = "Year";
-            Year.Size = new Size(59, 23);
-            Year.TabIndex = 0;
-            Year.SelectedIndexChanged += Year_SelectedIndexChanged;
-            // 
-            // Month
-            // 
-            Month.FormattingEnabled = true;
-            Month.Location = new Point(83, 0);
-            Month.Name = "Month";
-            Month.Size = new Size(45, 23);
-            Month.TabIndex = 1;
-            Month.SelectedIndexChanged += Month_SelectedIndexChanged;
-            // 
-            // Day
-            // 
-            Day.FormattingEnabled = true;
-            Day.Location = new Point(152, 0);
-            Day.Name = "Day";
-            Day.Size = new Size(45, 23);
-            Day.TabIndex = 2;
-            Day.SelectedIndexChanged += Day_SelectedIndexChanged;
             // 
             // label1
             // 
@@ -91,30 +67,65 @@
             DatePicker.TabIndex = 5;
             DatePicker.Visible = false;
             // 
+            // Year
+            // 
+            Year.Location = new Point(0, 0);
+            Year.Maximum = new decimal(new int[] { 2030, 0, 0, 0 });
+            Year.Minimum = new decimal(new int[] { 2020, 0, 0, 0 });
+            Year.Name = "Year";
+            Year.Size = new Size(59, 23);
+            Year.TabIndex = 6;
+            Year.Value = new decimal(new int[] { 2020, 0, 0, 0 });
+            Year.ValueChanged += Year_ValueChanged;
+            // 
+            // Month
+            // 
+            Month.Location = new Point(83, 0);
+            Month.Maximum = new decimal(new int[] { 12, 0, 0, 0 });
+            Month.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            Month.Name = "Month";
+            Month.Size = new Size(45, 23);
+            Month.TabIndex = 7;
+            Month.Value = new decimal(new int[] { 12, 0, 0, 0 });
+            Month.ValueChanged += Month_ValueChanged;
+            // 
+            // Day
+            // 
+            Day.Location = new Point(152, 0);
+            Day.Maximum = new decimal(new int[] { 31, 0, 0, 0 });
+            Day.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            Day.Name = "Day";
+            Day.Size = new Size(45, 23);
+            Day.TabIndex = 8;
+            Day.Value = new decimal(new int[] { 12, 0, 0, 0 });
+            Day.ValueChanged += Day_ValueChanged;
+            // 
             // UserDateCombo
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(label2);
-            Controls.Add(label1);
             Controls.Add(Day);
             Controls.Add(Month);
             Controls.Add(Year);
+            Controls.Add(label2);
+            Controls.Add(label1);
             Controls.Add(DatePicker);
             Name = "UserDateCombo";
             Size = new Size(406, 23);
             Load += UserDateCombo_Load;
+            ((System.ComponentModel.ISupportInitialize)Year).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Month).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Day).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
-
-        private ComboBox Year;
-        private ComboBox Month;
-        private ComboBox Day;
         private Label label1;
         private Label label2;
         private DateTimePicker DatePicker;
+        private NumericUpDown Year;
+        private NumericUpDown Month;
+        private NumericUpDown Day;
     }
 }

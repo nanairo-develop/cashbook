@@ -84,6 +84,8 @@
             ComboManager.Name = "ComboManager";
             ComboManager.Size = new Size(121, 23);
             ComboManager.TabIndex = 2;
+            ComboManager.KeyDown += ComboManager_KeyDown;
+            ComboManager.Leave += ComboManager_Leave;
             // 
             // ComboOffice
             // 
@@ -93,6 +95,7 @@
             ComboOffice.Size = new Size(285, 23);
             ComboOffice.TabIndex = 3;
             ComboOffice.KeyDown += ComboOffice_KeyDown;
+            ComboOffice.Leave += ComboOffice_Leave;
             // 
             // DetailList
             // 
@@ -123,6 +126,7 @@
             SumData.RowTemplate.Height = 25;
             SumData.Size = new Size(247, 54);
             SumData.TabIndex = 7;
+            SumData.TabStop = false;
             // 
             // SumReceivable
             // 
@@ -152,6 +156,7 @@
             SlipNumber.Name = "SlipNumber";
             SlipNumber.Size = new Size(100, 23);
             SlipNumber.TabIndex = 4;
+            SlipNumber.Leave += SlipNumber_Leave;
             // 
             // SlipNumberLabel
             // 
@@ -167,9 +172,10 @@
             Change.Location = new Point(611, 333);
             Change.Name = "Change";
             Change.Size = new Size(75, 23);
-            Change.TabIndex = 6;
+            Change.TabIndex = 8;
             Change.Text = "更新";
             Change.UseVisualStyleBackColor = true;
+            Change.Click += Change_Click;
             // 
             // MessageArea
             // 
@@ -180,7 +186,7 @@
             MessageArea.Name = "MessageArea";
             MessageArea.ScrollBars = ScrollBars.Vertical;
             MessageArea.Size = new Size(674, 74);
-            MessageArea.TabIndex = 11;
+            MessageArea.TabIndex = 9;
             // 
             // DatePicker
             // 
@@ -191,11 +197,9 @@
             DatePicker.Location = new Point(85, 6);
             DatePicker.Name = "DatePicker";
             DatePicker.Size = new Size(205, 23);
-            DatePicker.TabIndex = 12;
-            DatePicker.TextDay = "2";
-            DatePicker.TextMonth = "5";
-            DatePicker.TextYear = "2023";
+            DatePicker.TabIndex = 1;
             DatePicker.Value = new DateTime(2023, 5, 2, 0, 0, 0, 0);
+            DatePicker.Leave += DatePicker_Leave;
             // 
             // Memo
             // 
@@ -204,7 +208,7 @@
             Memo.Name = "Memo";
             Memo.ScrollBars = ScrollBars.Vertical;
             Memo.Size = new Size(340, 54);
-            Memo.TabIndex = 13;
+            Memo.TabIndex = 6;
             // 
             // OfficeSelect
             // 

@@ -55,7 +55,6 @@ namespace cashbook
         }
         private void Search_Click(object sender, EventArgs e)
         {
-
             // データグリッドに表示させる
             DateTo.DateTimeFrom = DateFrom.Value;
             PurchaseList.DataSource = GetPurchases();

@@ -18,7 +18,6 @@ namespace cashbook.common
         {
             labels.ForEach(SetClearLabelColor);
         }
-
         #endregion Label
 
         #region DataGridViewCellStyle
@@ -66,12 +65,32 @@ namespace cashbook.common
 
         public static void Combo_KeyDown(DataTable dt, ComboBox comboBox)
         {
-            //コンボボックスのデータの更新の為
+            // コンボボックスのデータの更新の為
             DataView dv = dt.DefaultView;
-            //コンボボックスに入力された文字列でフィルター
+            // コンボボックスに入力された文字列でフィルター
             dv.RowFilter = "name LIKE '*" + comboBox.Text + "*'";
         }
+
+        public static void SetErrorComboColor(ComboBox comboBox)
+        {
+            comboBox.BackColor = Color.Red;
+        }
+        public static void SetClearComboColor(ComboBox comboBox)
+        {
+            comboBox.BackColor = SystemColors.Window;
+        }
         #endregion ComboBox
+        #region NumericUpDown
+        public static void SetErrorNumericUpDownColor(NumericUpDown numericUpDown)
+        {
+            numericUpDown.BackColor = Color.Red;
+        }
+
+        public static void SetClearNumericUpDownColor(NumericUpDown numericUpDown)
+        {
+            numericUpDown.BackColor = SystemColors.Window;
+        }
+        #endregion NumericUpDown
 
     }
 }

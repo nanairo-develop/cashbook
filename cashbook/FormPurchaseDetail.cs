@@ -6,10 +6,12 @@ using System.Diagnostics;
 using System.Globalization;
 using static cashbook.common.ComConst.Mode;
 using static cashbook.common.ComControl;
+using static cashbook.common.ComValidation;
 using static cashbook.dao.MManagerDao;
 using static cashbook.dao.MOfficeDao;
 using static cashbook.dao.TPurchaseDao;
 using static cashbook.dao.TPurchaseDetailDao;
+
 
 
 namespace cashbook
@@ -105,11 +107,9 @@ namespace cashbook
 
             SumData.AllowUserToAddRows = false;
             _ = SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
-            //SumData[(int)DataSumColumns.receivableSum, 0].Value = SumAmount((int)DetailListColumns.receivable);
             SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Format = "c";
 
-            //SumData[(int)DataSumColumns.payableSum, 0].Value = SumAmount((int)DetailListColumns.payable);
             SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
             SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Format = "c";
 
@@ -123,6 +123,40 @@ namespace cashbook
             }
             Wait = false;
         }
+
+        private void DatePicker_Leave(object sender, EventArgs e)
+        {
+            // 未来日付はNG
+            MessageArea.Text += CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
+        }
+
+        private void ComboManager_KeyDown(object sender, KeyEventArgs e)
+        {
+            Combo_KeyDown(manager, ComboManager);
+        }
+
+        private void ComboManager_Leave(object sender, EventArgs e)
+        {
+            // 担当者指定なしはNG
+            MessageArea.Text += NoSelection(ComboManager, ComboManagerLabel);
+        }
+
+        private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
+        {
+            Combo_KeyDown(office, ComboOffice);
+        }
+        private void ComboOffice_Leave(object sender, EventArgs e)
+        {
+            // 相手先指定なしはNG
+            MessageArea.Text += NoSelection(ComboOffice, ComboOfficeLabel);
+        }
+
+        private void SlipNumber_Leave(object sender, EventArgs e)
+        {
+            // 伝票番号無しはNG
+            MessageArea.Text += CheckEmpty(SlipNumber, SlipNumberLabel);
+        }
+
 
         private void DetailList_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
         {
@@ -167,20 +201,22 @@ namespace cashbook
                     break;
             }
         }
-        private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
-        {
-            Combo_KeyDown(office, ComboOffice);
-        }
 
         private void Insert_Click(object sender, EventArgs e)
         {
             // MessageAreaの初期化
             MessageArea.Text = string.Empty;
+
             // チェック処理
             if (!IsValidation())
             {
                 return;
             };
+
+            // 警告処理
+            // 30日以上前の日付の場合警告を出す
+
+            // 同じ日付、同じ相手先、同じ伝票番号の場合警告を出す
 
             // Insert
             ExecInsert();
@@ -196,6 +232,11 @@ namespace cashbook
             Wait = true;
             FormOfficeList formOfficeList = new(select);
             formOfficeList.Show(this);
+        }
+
+        private void Change_Click(object sender, EventArgs e)
+        {
+            // Delete-Insertで登録する
         }
 
         #endregion イベント
@@ -309,12 +350,6 @@ namespace cashbook
 
         private void InsertPurchase(MySqlConnection conn, MySqlTransaction transaction)
         {
-            //TPurchaseDto purchaseDto = new(
-            //    DatePicker.Value,
-            //    ComboOffice.SelectedValue,
-            //    ComboManager.SelectedValue,
-            //    SlipNumber.Text,
-            //    Memo.Text);
             TPurchaseDto purchaseDto = new(ComboOffice.SelectedValue, ComboManager.SelectedValue)
             {
                 PayDate = DatePicker.Value,
@@ -356,13 +391,6 @@ namespace cashbook
                         UseForFood = (bool)rows.Cells[4].Value
                     };
                     purchaseDetailDtos.Add(purchaseDetailDto);
-                    //purchaseDetailDtos.Add(new(
-                    //    purchaseId: purchaseId,
-                    //    branchId: (sbyte)rows.Cells[0].Value,
-                    //    description: (string)rows.Cells[1].Value,
-                    //    receivable: (int)rows.Cells[2].Value,
-                    //    payable: (int)rows.Cells[3].Value,
-                    //    useForFood: (bool)rows.Cells[4].Value));
                 }
             }
 
@@ -383,63 +411,29 @@ namespace cashbook
         #region チェック処理
         private bool IsValidation()
         {
-            bool ret = true;
+            MessageArea.Text = string.Empty;
+
             // 日付
             // 未来日付はNG
-            if (DatePicker.Value > DateTime.Now)
-            {
-                SetErrorLabelColor(DatePickerLabel);
-                MessageArea.Text += string.Empty;
-                ret = false;
-            }
-            else
-            {
-                SetClearLabelColor(DatePickerLabel);
-            }
+            MessageArea.Text = CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
 
             // 担当者
             // 担当者指定なしはNG
-            if (ComboManager.SelectedValue == null)
-            {
-                SetErrorLabelColor(ComboManagerLabel);
-                ret = false;
-            }
-            else
-            {
-                SetClearLabelColor(ComboManagerLabel);
-            }
+            MessageArea.Text += NoSelection(ComboManager, ComboManagerLabel);
 
             // 相手先
             // 相手先指定なしはNG
-            if (ComboOffice.SelectedValue == null)
-            {
-                SetErrorLabelColor(ComboOfficeLabel);
-                ret = false;
-            }
-            else
-            {
-                SetClearLabelColor(ComboOfficeLabel);
-            }
+            MessageArea.Text += NoSelection(ComboOffice, ComboOfficeLabel);
 
             // 伝票番号
             // 伝票番号無しはNG
-            if (SlipNumber.Text == string.Empty)
-            {
-                SetErrorLabelColor(SlipNumberLabel);
-                ret = false;
-            }
-            else
-            {
-                SetClearLabelColor(SlipNumberLabel);
-            }
-
+            MessageArea.Text += CheckEmpty(SlipNumber, SlipNumberLabel);
 
             // 明細
             // 件数0はNG
             if (DetailList.RowCount == 1)
             {
                 SetErrorGridColor(DetailList.DefaultCellStyle);
-                ret = false;
             }
             else
             {
@@ -448,9 +442,9 @@ namespace cashbook
             // 内容無しはNG
             if (!IsExistDescription())
             {
-                ret = false;
             }
-            return ret;
+
+            return MessageArea.Text == string.Empty;
         }
 
         private bool IsExistDescription()
