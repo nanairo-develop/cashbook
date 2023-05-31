@@ -23,6 +23,7 @@ namespace cashbook
 
         private readonly DataTable office = new();
         private readonly DataTable manager = new();
+        private readonly DataTable DetailListDataTable = new();
 
         public int OfficeId { get; set; }
         public bool Wait { get; set; }
@@ -77,6 +78,7 @@ namespace cashbook
         #endregion コンストラクタ
 
         #region イベント
+        #region FormPurchaseDetail
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
             // コンボボックスの設定
@@ -100,11 +102,13 @@ namespace cashbook
             };
             SetComboBox(comboOffice);
 
-            SetDetailList();
-
             ComboManager.SelectedValue = managerId;
             ComboOffice.SelectedValue = OfficeId;
 
+            // 伝票明細の設定
+            SetDetailList();
+
+            // 合計欄の設定
             SumData.AllowUserToAddRows = false;
             _ = SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
             SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -123,6 +127,7 @@ namespace cashbook
             }
             Wait = false;
         }
+        #endregion FormPurchaseDetail
 
         private void DatePicker_Leave(object sender, EventArgs e)
         {
@@ -130,6 +135,7 @@ namespace cashbook
             MessageArea.Text += CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
         }
 
+        #region ComboManager
         private void ComboManager_KeyDown(object sender, KeyEventArgs e)
         {
             Combo_KeyDown(manager, ComboManager);
@@ -140,7 +146,9 @@ namespace cashbook
             // 担当者指定なしはNG
             MessageArea.Text += NoSelection(ComboManager, ComboManagerLabel);
         }
+        #endregion ComboManager
 
+        #region ComboOffice
         private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
         {
             Combo_KeyDown(office, ComboOffice);
@@ -150,6 +158,7 @@ namespace cashbook
             // 相手先指定なしはNG
             MessageArea.Text += NoSelection(ComboOffice, ComboOfficeLabel);
         }
+        #endregion ComboOffice
 
         private void SlipNumber_Leave(object sender, EventArgs e)
         {
@@ -157,35 +166,12 @@ namespace cashbook
             MessageArea.Text += CheckEmpty(SlipNumber, SlipNumberLabel);
         }
 
-
-        private void DetailList_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        private void RowAdd_Click(object sender, EventArgs e)
         {
-            if (e.ColumnIndex is ((int)DetailListColumns.receivable) or ((int)DetailListColumns.payable))
-            {
-
-                if (e.FormattedValue is not null)
-                {
-                    if (e.FormattedValue.ToString() == string.Empty)
-                    {
-                        DetailList[e.ColumnIndex, e.RowIndex].Value = 0;
-                    }
-                    CultureInfo provider = new("ja-JP");
-                    NumberStyles styles = NumberStyles.Integer
-                                          | NumberStyles.AllowCurrencySymbol
-                                          | NumberStyles.AllowThousands;
-                    if (int.TryParse(e.FormattedValue.ToString(), styles, provider, out _))
-                    {
-                        // 合計値を計算
-                        SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
-                    }
-                    else
-                    {
-                        _ = MessageBox.Show("整数を入力してください。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        e.Cancel = true;
-                    }
-                }
-            }
+            _ = DetailListDataTable.Rows.Add();
         }
+
+        #region DetailList
         private void DetailList_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
             // IMEモードの設定
@@ -200,6 +186,57 @@ namespace cashbook
                 default:
                     break;
             }
+        }
+
+        private void DetailList_CellLeave(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex is ((int)DetailListColumns.receivable) or ((int)DetailListColumns.payable))
+            {
+                try
+                {
+                    // 空欄の場合強制的に0にする
+                    DataGridViewCell cell = DetailList[e.ColumnIndex, e.RowIndex];
+                    if (cell.Value.ToString() == string.Empty)
+                    {
+                        cell.Value = 0;
+                    }
+
+                    // 整数値変換できる値かチェックする
+                    CultureInfo provider = new("ja-JP");
+                    NumberStyles styles = NumberStyles.Integer
+                                            | NumberStyles.AllowCurrencySymbol
+                                            | NumberStyles.AllowThousands;
+                    if (DetailList.EditingControl is not null)
+                    {
+                        if (!int.TryParse(DetailList.EditingControl.Text, styles, provider, out _))
+                        {
+                            _ = MessageBox.Show("整数を入力してください。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        else
+                        {
+                            // 合計値を計算
+                            SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
+                        }
+                    }
+                    else
+                    {
+                        // 合計値を計算
+                        SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _ = MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        #endregion DetailList
+        private void OfficeSelect_Click(object sender, EventArgs e)
+        {
+            Wait = true;
+            FormOfficeList formOfficeList = new(select);
+            formOfficeList.Show(this);
         }
 
         private void Insert_Click(object sender, EventArgs e)
@@ -225,13 +262,6 @@ namespace cashbook
 
             // 画面再読み込み
 
-        }
-
-        private void OfficeSelect_Click(object sender, EventArgs e)
-        {
-            Wait = true;
-            FormOfficeList formOfficeList = new(select);
-            formOfficeList.Show(this);
         }
 
         private void Change_Click(object sender, EventArgs e)
@@ -263,7 +293,8 @@ namespace cashbook
         {
             DetailList.AllowUserToAddRows = false;
             DetailList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            DetailList.DataSource = GetPurchaseDetails();
+            GetPurchaseDetails();
+            DetailList.DataSource = DetailListDataTable;
             DetailList.Columns["description"].Width = 200;
             DetailList.Columns["description"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             DetailList.Columns["receivable"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -272,7 +303,7 @@ namespace cashbook
             DetailList.Columns["payable"].DefaultCellStyle.Format = "c";
         }
 
-        private DataTable GetPurchaseDetails()
+        private void GetPurchaseDetails()
         {
             using MySqlConnection conn = new(ComConst.connStr);
 
@@ -280,18 +311,14 @@ namespace cashbook
             conn.Open();
 
             // 明細行の取得
-            // データを取得するテーブル
-            DataTable dt = new();
 
             // クエリを作成する
             string query = GetSelectPurchaseDetail(purchaseId);
 
             MySqlDataAdapter dataAdp = new(query, conn);
-            _ = dataAdp.Fill(dt);
-
-            return dt;
-
+            _ = dataAdp.Fill(DetailListDataTable);
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -450,7 +477,7 @@ namespace cashbook
         private bool IsExistDescription()
         {
             bool ret = true;
-            for (int i = 0; i < DetailList.RowCount - 1; i++)
+            for (int i = 0; i < DetailList.RowCount; i++)
             {
                 DataGridViewRow row = DetailList.Rows[i];
                 // 内容無しはNG
@@ -469,6 +496,5 @@ namespace cashbook
         }
         #endregion チェック処理
         #endregion メソッド
-
     }
 }

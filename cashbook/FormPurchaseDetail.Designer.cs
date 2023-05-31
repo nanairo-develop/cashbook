@@ -46,6 +46,7 @@
             DatePicker = new UserDateCombo();
             Memo = new TextBox();
             OfficeSelect = new Button();
+            RowAdd = new Button();
             ((System.ComponentModel.ISupportInitialize)DetailList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SumData).BeginInit();
             SuspendLayout();
@@ -114,7 +115,7 @@
             DetailList.Size = new Size(674, 227);
             DetailList.TabIndex = 5;
             DetailList.CellEnter += DetailList_CellEnter;
-            DetailList.CellValidating += DetailList_CellValidating;
+            DetailList.CellLeave += DetailList_CellLeave;
             // 
             // SumData
             // 
@@ -220,11 +221,22 @@
             OfficeSelect.UseVisualStyleBackColor = true;
             OfficeSelect.Click += OfficeSelect_Click;
             // 
+            // RowAdd
+            // 
+            RowAdd.Location = new Point(627, 42);
+            RowAdd.Name = "RowAdd";
+            RowAdd.Size = new Size(59, 23);
+            RowAdd.TabIndex = 15;
+            RowAdd.Text = "行追加";
+            RowAdd.UseVisualStyleBackColor = true;
+            RowAdd.Click += RowAdd_Click;
+            // 
             // FormPurchaseDetail
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(700, 450);
+            Controls.Add(RowAdd);
             Controls.Add(OfficeSelect);
             Controls.Add(Memo);
             Controls.Add(DatePicker);
@@ -270,5 +282,6 @@
         private UserDateCombo DatePicker;
         private TextBox Memo;
         private Button OfficeSelect;
+        private Button RowAdd;
     }
 }
