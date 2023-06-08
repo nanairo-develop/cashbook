@@ -12,21 +12,27 @@ using static cashbook.dao.MOfficeDao;
 using static cashbook.dao.TPurchaseDao;
 using static cashbook.dao.TPurchaseDetailDao;
 
-
-
 namespace cashbook
 {
     public partial class FormPurchaseDetail : Form
     {
+        #region メンバ変数
         private int purchaseId;
         private readonly int managerId;
 
         private readonly DataTable office = new();
         private readonly DataTable manager = new();
         private readonly DataTable DetailListDataTable = new();
+        #endregion メンバ変数
 
+        #region プロパティ
         public int OfficeId { get; set; }
+
+        /// <summary>
+        /// 子画面値設定待ち状態 true:待ち
+        /// </summary>
         public bool Wait { get; set; }
+        #endregion プロパティ
 
         private enum DataSumColumns
         {
@@ -41,6 +47,7 @@ namespace cashbook
             payable,
             useforfood
         }
+
         /// <summary>
         /// コンストラクタ用のパラメータ構造体
         /// </summary>
@@ -149,6 +156,11 @@ namespace cashbook
         }
         #endregion FormPurchaseDetail
 
+        /// <summary>
+        /// 日付を離れたときのエラーチェック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DatePicker_Leave(object sender, EventArgs e)
         {
             // 未来日付はNG
@@ -156,6 +168,11 @@ namespace cashbook
         }
 
         #region ComboManager
+        /// <summary>
+        /// ComboBox絞り込み処理を呼び出す
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ComboManager_KeyDown(object sender, KeyEventArgs e)
         {
             Combo_KeyDown(manager, ComboManager);
@@ -318,12 +335,12 @@ namespace cashbook
             DetailList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             GetPurchaseDetails();
             DetailList.DataSource = DetailListDataTable;
-            DetailList.Columns["description"].Width = 200;
-            DetailList.Columns["description"].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-            DetailList.Columns["receivable"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            DetailList.Columns["receivable"].DefaultCellStyle.Format = "c";
-            DetailList.Columns["payable"].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            DetailList.Columns["payable"].DefaultCellStyle.Format = "c";
+            DetailList.Columns[(int)DetailListColumns.description].Width = 200;
+            DetailList.Columns[(int)DetailListColumns.description].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            DetailList.Columns[(int)DetailListColumns.receivable].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            DetailList.Columns[(int)DetailListColumns.receivable].DefaultCellStyle.Format = "c";
+            DetailList.Columns[(int)DetailListColumns.payable].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            DetailList.Columns[(int)DetailListColumns.payable].DefaultCellStyle.Format = "c";
         }
 
         private void GetPurchaseDetails()
@@ -343,7 +360,7 @@ namespace cashbook
         }
 
         /// <summary>
-        /// 
+        /// 新しい伝票番号を取得する
         /// </summary>
         /// <returns>エラーの場合は0が返却される</returns>
         private static int SelectPurchaseId(MySqlConnection conn, MySqlTransaction transaction)
