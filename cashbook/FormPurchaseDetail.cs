@@ -41,6 +41,9 @@ namespace cashbook
             payable,
             useforfood
         }
+        /// <summary>
+        /// コンストラクタ用のパラメータ構造体
+        /// </summary>
         public struct Param
         {
             public int id;
@@ -52,6 +55,9 @@ namespace cashbook
         }
 
         #region コンストラクタ
+        /// <summary>
+        /// 新規伝票のコンストラクタ
+        /// </summary>
         public FormPurchaseDetail()
         {
             InitializeComponent();
@@ -62,6 +68,10 @@ namespace cashbook
             Wait = false;
         }
 
+        /// <summary>
+        /// 明細をクリックしたときのコンストラクタ
+        /// </summary>
+        /// <param name="param"></param>
         public FormPurchaseDetail(Param param)
         {
             InitializeComponent();
@@ -79,6 +89,11 @@ namespace cashbook
 
         #region イベント
         #region FormPurchaseDetail
+        /// <summary>
+        /// 画面ロード
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
             // コンボボックスの設定
@@ -119,6 +134,11 @@ namespace cashbook
 
         }
 
+        /// <summary>
+        /// 画面がActiveになった時、コンボオフィスの値を設定する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void FormPurchaseDetail_Activated(object sender, EventArgs e)
         {
             if (Wait)
@@ -289,6 +309,9 @@ namespace cashbook
 
         #region 検索処理
 
+        /// <summary>
+        /// Selectした内容をDataGridViewに設定する
+        /// </summary>
         private void SetDetailList()
         {
             DetailList.AllowUserToAddRows = false;
@@ -333,7 +356,7 @@ namespace cashbook
                 command.Transaction = transaction;
 
                 object? scalar = command.ExecuteScalar();
-                ret = scalar is not null ? (int)scalar : throw new Exception(message: "ヘダーInsertが失敗している");
+                ret = scalar is not null ? (int)scalar : throw new InvalidOperationException(message: "ヘダーInsertが失敗している");
             }
             catch (MySqlException mse)
             {
