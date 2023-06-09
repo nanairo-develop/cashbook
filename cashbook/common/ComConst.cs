@@ -13,5 +13,23 @@
             /// <summary>画面起動モード：選択</summary>
             public static readonly int select = 1;
         }
+
+        public class FormPurchaseDetail
+        {
+            public enum DataSumColumns
+            {
+                receivableSum = 0,
+                payableSum
+            }
+            public enum DetailListColumns
+            {
+                blanchId = 0,
+                description,
+                receivable,
+                payable,
+                useforfood
+            }
+
+        }
     }
 }

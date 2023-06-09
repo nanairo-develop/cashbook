@@ -99,6 +99,17 @@ namespace cashbook.common
             return errorMessage;
         }
 
+        public static string CheckRowCount(DataGridView dataGridView)
+        {
+            string errorMessage = string.Empty;
+            if (dataGridView.RowCount == 1)
+            {
+                SetErrorGridColor(dataGridView.DefaultCellStyle);
+                errorMessage = "登録には1行以上入力してください";
+            }
+            return errorMessage;
+        }
+
         /// <summary>
         /// エラーがある場合trueを返す
         /// </summary>

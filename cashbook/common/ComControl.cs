@@ -1,9 +1,10 @@
 ﻿using MySqlConnector;
 using System.Data;
+using static cashbook.common.ComConst.FormPurchaseDetail;
 
 namespace cashbook.common
 {
-    internal class ComControl
+    internal static class ComControl
     {
         #region Label
         public static void SetErrorLabelColor(Label label)
@@ -20,6 +21,18 @@ namespace cashbook.common
         }
         #endregion Label
 
+        #region DataGridView
+        #region DataGridViewCell
+        public static DataGridViewCell Cell(this DataGridView self, Enum columnEnum, int rowIndex)
+        {
+            return self[columnEnum.GetHashCode(), rowIndex];
+        }
+        public static DataGridViewCell Cells(this DataGridViewRow self, Enum columnEnum)
+        {
+            return self.Cells[columnEnum.GetHashCode()];
+        }
+        #endregion DataGridViewCell
+
         #region DataGridViewCellStyle
         public static void SetErrorGridColor(DataGridViewCellStyle dataGridViewCellStyle)
         {
@@ -30,6 +43,11 @@ namespace cashbook.common
             dataGridViewCellStyle.BackColor = SystemColors.Window;
         }
         #endregion DataGridViewCellStyle
+        public static DataGridViewColumn Columns(this DataGridView self, Enum columnEnum)
+        {
+            return self.Columns[columnEnum.GetHashCode()];
+        }
+        #endregion DataGridView
 
         #region ComboBox
         public struct ComboBoxParam

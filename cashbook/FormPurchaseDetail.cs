@@ -2,15 +2,17 @@
 using cashbook.dto;
 using MySqlConnector;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using static cashbook.common.ComConst.Mode;
+using static cashbook.common.ComConst.FormPurchaseDetail.DataSumColumns;
+using static cashbook.common.ComConst.FormPurchaseDetail.DetailListColumns;
 using static cashbook.common.ComControl;
 using static cashbook.common.ComValidation;
 using static cashbook.dao.MManagerDao;
 using static cashbook.dao.MOfficeDao;
 using static cashbook.dao.TPurchaseDao;
 using static cashbook.dao.TPurchaseDetailDao;
+using static cashbook.common.ComConst.FormPurchaseDetail;
 
 namespace cashbook
 {
@@ -33,20 +35,6 @@ namespace cashbook
         /// </summary>
         public bool Wait { get; set; }
         #endregion プロパティ
-
-        private enum DataSumColumns
-        {
-            receivableSum = 0,
-            payableSum
-        }
-        private enum DetailListColumns
-        {
-            blanchId = 0,
-            description,
-            receivable,
-            payable,
-            useforfood
-        }
 
         /// <summary>
         /// コンストラクタ用のパラメータ構造体
@@ -132,12 +120,12 @@ namespace cashbook
 
             // 合計欄の設定
             SumData.AllowUserToAddRows = false;
-            _ = SumData.Rows.Add(SumAmount((int)DetailListColumns.receivable), SumAmount((int)DetailListColumns.payable));
-            SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            SumData.Columns[(int)DataSumColumns.receivableSum].DefaultCellStyle.Format = "c";
+            _ = SumData.Rows.Add(SumAmount(receivable), SumAmount(payable));
+            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Format = "c";
 
-            SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            SumData.Columns[(int)DataSumColumns.payableSum].DefaultCellStyle.Format = "c";
+            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Format = "c";
 
         }
 
@@ -165,6 +153,8 @@ namespace cashbook
         {
             // 未来日付はNG
             MessageArea.Text += CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
+
+            // TODO: 30日以上前の日付の場合警告を出す
         }
 
         #region ComboManager
@@ -178,6 +168,11 @@ namespace cashbook
             Combo_KeyDown(manager, ComboManager);
         }
 
+        /// <summary>
+        /// 担当者選択を離れたときのエラーチェック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ComboManager_Leave(object sender, EventArgs e)
         {
             // 担当者指定なしはNG
@@ -186,10 +181,21 @@ namespace cashbook
         #endregion ComboManager
 
         #region ComboOffice
+        /// <summary>
+        /// ComboBox絞り込み処理を呼び出す
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ComboOffice_KeyDown(object sender, KeyEventArgs e)
         {
             Combo_KeyDown(office, ComboOffice);
         }
+
+        /// <summary>
+        /// 相手先選択を離れたときのエラーチェック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ComboOffice_Leave(object sender, EventArgs e)
         {
             // 相手先指定なしはNG
@@ -197,27 +203,44 @@ namespace cashbook
         }
         #endregion ComboOffice
 
+        /// <summary>
+        /// 伝票番号を離れたときのエラーチェック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SlipNumber_Leave(object sender, EventArgs e)
         {
             // 伝票番号無しはNG
             MessageArea.Text += CheckEmpty(SlipNumber, SlipNumberLabel);
         }
 
+        /// <summary>
+        /// 行追加ボタンクリック時の処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RowAdd_Click(object sender, EventArgs e)
         {
             _ = DetailListDataTable.Rows.Add();
         }
 
         #region DetailList
+
+        /// <summary>
+        /// カラムによってIMEモードを切り替える
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetailList_CellEnter(object sender, DataGridViewCellEventArgs e)
         {
+            DetailListColumns col = (DetailListColumns)e.ColumnIndex;
             // IMEモードの設定
-            switch (e.ColumnIndex)
+            switch (col)
             {
-                case ((int)DetailListColumns.blanchId) or ((int)DetailListColumns.receivable) or ((int)DetailListColumns.payable):
+                case blanchId or receivable or payable:
                     DetailList.ImeMode = ImeMode.Alpha;
                     break;
-                case (int)DetailListColumns.description:
+                case description:
                     DetailList.ImeMode = ImeMode.Hiragana;
                     break;
                 default:
@@ -225,9 +248,15 @@ namespace cashbook
             }
         }
 
+        /// <summary>
+        /// セルを離れたときに計算などおこなう
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetailList_CellLeave(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex is ((int)DetailListColumns.receivable) or ((int)DetailListColumns.payable))
+            DetailListColumns col = (DetailListColumns)e.ColumnIndex;
+            if (col is receivable or payable)
             {
                 try
                 {
@@ -252,13 +281,13 @@ namespace cashbook
                         else
                         {
                             // 合計値を計算
-                            SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
+                            SumData[e.ColumnIndex - 2, 0].Value = SumAmount(col);
                         }
                     }
                     else
                     {
                         // 合計値を計算
-                        SumData[e.ColumnIndex - 2, 0].Value = SumAmount(e.ColumnIndex);
+                        SumData[e.ColumnIndex - 2, 0].Value = SumAmount(col);
                     }
                 }
                 catch (Exception ex)
@@ -269,6 +298,11 @@ namespace cashbook
         }
 
         #endregion DetailList
+        /// <summary>
+        /// 相手先を選択するための画面を開く
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OfficeSelect_Click(object sender, EventArgs e)
         {
             Wait = true;
@@ -276,6 +310,11 @@ namespace cashbook
             formOfficeList.Show(this);
         }
 
+        /// <summary>
+        /// 登録ボタンクリック
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Insert_Click(object sender, EventArgs e)
         {
             // MessageAreaの初期化
@@ -288,9 +327,10 @@ namespace cashbook
             };
 
             // 警告処理
-            // 30日以上前の日付の場合警告を出す
-
-            // 同じ日付、同じ相手先、同じ伝票番号の場合警告を出す
+            if (IsWarning())
+            {
+                return;
+            }
 
             // Insert
             ExecInsert();
@@ -314,18 +354,17 @@ namespace cashbook
         /// </summary>
         /// <param name="col">売掛列か買掛列か/param>
         /// <returns>指定された列の合計</returns>
-        private int SumAmount(int col)
+        private int SumAmount(DetailListColumns col)
         {
             int sum = 0;
             for (int i = 0; i < DetailList.RowCount; i++)
             {
-                sum += int.TryParse(DetailList[col, i].Value.ToString(), out int a) ? a : 0;
+                sum += int.TryParse(ComControl.Cell(DetailList, col, i).Value.ToString(), out int a) ? a : 0;
             }
             return sum;
         }
 
         #region 検索処理
-
         /// <summary>
         /// Selectした内容をDataGridViewに設定する
         /// </summary>
@@ -335,14 +374,18 @@ namespace cashbook
             DetailList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             GetPurchaseDetails();
             DetailList.DataSource = DetailListDataTable;
-            DetailList.Columns[(int)DetailListColumns.description].Width = 200;
-            DetailList.Columns[(int)DetailListColumns.description].DefaultCellStyle.WrapMode = DataGridViewTriState.True;
-            DetailList.Columns[(int)DetailListColumns.receivable].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            DetailList.Columns[(int)DetailListColumns.receivable].DefaultCellStyle.Format = "c";
-            DetailList.Columns[(int)DetailListColumns.payable].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            DetailList.Columns[(int)DetailListColumns.payable].DefaultCellStyle.Format = "c";
+            ComControl.Columns(DetailList, description).Width = 200;
+            ComControl.Columns(DetailList, description).DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+            ComControl.Columns(DetailList, receivable).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            ComControl.Columns(DetailList, payable).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
+        /// <summary>
+        /// 伝票明細を取得する
+        /// </summary>
+        /// <remarks>
+        /// 戻り値はないが、メソッド内でメンバ変数に設定している
+        /// </remarks>
         private void GetPurchaseDetails()
         {
             using MySqlConnection conn = new(ComConst.connStr);
@@ -385,6 +428,9 @@ namespace cashbook
         #endregion 検索処理
 
         #region 更新処理
+        /// <summary>
+        /// 更新処理まとめ
+        /// </summary>
         private void ExecInsert()
         {
             using MySqlConnection conn = new(ComConst.connStr);
@@ -415,6 +461,11 @@ namespace cashbook
             }
         }
 
+        /// <summary>
+        /// 伝票の登録
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="transaction"></param>
         private void InsertPurchase(MySqlConnection conn, MySqlTransaction transaction)
         {
             TPurchaseDto purchaseDto = new(ComboOffice.SelectedValue, ComboManager.SelectedValue)
@@ -436,13 +487,20 @@ namespace cashbook
                 _ = MessageBox.Show("insert ERROR");
             }
         }
+
+        /// <summary>
+        /// 伝票明細の登録
+        /// </summary>
+        /// <param name="purchaseId"></param>
+        /// <param name="conn"></param>
+        /// <param name="transaction"></param>
         private void InsertPurchaseDetail(int purchaseId, MySqlConnection conn, MySqlTransaction transaction)
         {
             List<TPurchaseDetailDto> purchaseDetailDtos = new();
             for (int i = 0; i < DetailList.RowCount - 1; i++)
             {
                 DataGridViewRow rows = DetailList.Rows[i];
-                if (rows.Cells[0].Value is null)
+                if (ComControl.Cells(rows, blanchId).Value is null)
                 {
                     break;
                 }
@@ -451,11 +509,11 @@ namespace cashbook
                     TPurchaseDetailDto purchaseDetailDto = new()
                     {
                         PurchaseId = purchaseId,
-                        BranchId = (sbyte)rows.Cells[0].Value,
-                        Description = (string)rows.Cells[1].Value,
-                        Receivable = (int)rows.Cells[2].Value,
-                        Payable = (int)rows.Cells[3].Value,
-                        UseForFood = (bool)rows.Cells[4].Value
+                        BranchId = (sbyte)ComControl.Cells(rows, blanchId).Value,
+                        Description = (string)ComControl.Cells(rows, description).Value,
+                        Receivable = (int)ComControl.Cells(rows, receivable).Value,
+                        Payable = (int)ComControl.Cells(rows, payable).Value,
+                        UseForFood = (bool)ComControl.Cells(rows, useforfood).Value
                     };
                     purchaseDetailDtos.Add(purchaseDetailDto);
                 }
@@ -476,6 +534,10 @@ namespace cashbook
         #endregion 更新処理
 
         #region チェック処理
+        /// <summary>
+        /// 更新前に実施するチェック処理
+        /// </summary>
+        /// <returns>true:エラーなし</returns>
         private bool IsValidation()
         {
             MessageArea.Text = string.Empty;
@@ -498,40 +560,45 @@ namespace cashbook
 
             // 明細
             // 件数0はNG
-            if (DetailList.RowCount == 1)
-            {
-                SetErrorGridColor(DetailList.DefaultCellStyle);
-            }
-            else
-            {
-                SetClearGridColor(DetailList.DefaultCellStyle);
-            }
+            MessageArea.Text += CheckRowCount(DetailList);
             // 内容無しはNG
-            if (!IsExistDescription())
-            {
-            }
+            MessageArea.Text += CheckExistDescription();
 
             return MessageArea.Text == string.Empty;
         }
 
-        private bool IsExistDescription()
+        /// <summary>
+        /// 内容が存在するかチェックする
+        /// </summary>
+        /// <returns></returns>
+        private string CheckExistDescription()
         {
-            bool ret = true;
+            string errorMessage = string.Empty;
             for (int i = 0; i < DetailList.RowCount; i++)
             {
                 DataGridViewRow row = DetailList.Rows[i];
                 // 内容無しはNG
-                if (row.Cells[1].Value.ToString() == string.Empty)
+                if (ComControl.Cells(row, description).Value.ToString()?.Trim() == string.Empty)
                 {
-                    SetErrorGridColor(row.Cells[1].Style);
-                    ret = false;
-                    Debug.WriteLine("未記載");
-                }
-                else
-                {
-                    SetClearGridColor(row.Cells[1].Style);
+                    SetErrorGridColor(ComControl.Cells(row, description).Style);
+                    errorMessage = "内容は入力してください";
                 }
             }
+            return errorMessage;
+        }
+
+        /// <summary>
+        /// 警告処理
+        /// </summary>
+        /// <returns>true:警告中断</returns>
+        private bool IsWarning()
+        {
+            bool ret = false;
+            // 30日以上前の日付の場合警告を出す
+            // TODO: 
+
+            // 同じ日付、同じ相手先、同じ伝票番号の場合警告を出す
+
             return ret;
         }
         #endregion チェック処理
