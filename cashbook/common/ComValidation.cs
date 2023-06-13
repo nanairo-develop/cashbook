@@ -83,10 +83,31 @@ namespace cashbook.common
             if (datetimeFirst > dateTimeSecond)
             {
                 SetErrorLabelColor(label);
-                errorMessage = label.Text + "は本日より過去の日付を入力してください";
+                errorMessage = label.Text + "は右の日付より過去の日付を入力してください";
             }
 
             return errorMessage;
+        }
+        public static string CheckFuture(DateTime datetime, Label label)
+        {
+            string errorMessage = string.Empty;
+            if (CheckGreaterThan(datetime, DateTime.Now, label) != string.Empty)
+            {
+                errorMessage = label.Text + "は本日より過去の日付を入力してください";
+            }
+            return errorMessage;
+        }
+        public static string CheckPast(DateTime datetime, Label label)
+        {
+            string warningMessage = string.Empty;
+            // TODO: CheckFutureのコピー、手直し必要
+            TimeSpan subst = new(30, 0, 0, 0);
+            DateTime pastDate = DateTime.Now - subst;
+            if (CheckGreaterThan(pastDate, datetime, label) != string.Empty)
+            {
+                warningMessage = label.Text + "が本日より30日以上古いです";
+            }
+            return warningMessage;
         }
         public static string NoSelection(ComboBox comboBox, Label label)
         {

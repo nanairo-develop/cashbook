@@ -4,6 +4,7 @@ using System.Data;
 using static cashbook.FormPurchaseListDao;
 using static cashbook.dao.MManagerDao;
 using static cashbook.dao.MOfficeDao;
+using cashbook.dto;
 
 namespace cashbook
 {
@@ -80,16 +81,17 @@ namespace cashbook
             }
             else
             {
-                FormPurchaseDetail.Param param = new()
+                TPurchaseDto purchaseDto = new()
                 {
-                    id = (int)PurchaseList.Rows[e.RowIndex].Cells[0].Value,
-                    payDate = (DateTime)PurchaseList.Rows[e.RowIndex].Cells[1].Value,
-                    officeId = (int)PurchaseList.Rows[e.RowIndex].Cells[2].Value,
-                    managerId = (int)PurchaseList.Rows[e.RowIndex].Cells[4].Value,
-                    slipNumber = (string)PurchaseList.Rows[e.RowIndex].Cells[6].Value,
-                    memo = PurchaseList.Rows[e.RowIndex].Cells[7].Value ?? string.Empty
+                    Id = (int)PurchaseList.Rows[e.RowIndex].Cells[0].Value,
+                    PayDate = (DateTime)PurchaseList.Rows[e.RowIndex].Cells[1].Value,
+                    Destination = (int)PurchaseList.Rows[e.RowIndex].Cells[2].Value,
+                    Manager = (int)PurchaseList.Rows[e.RowIndex].Cells[4].Value,
+                    SlipNumber = (string)PurchaseList.Rows[e.RowIndex].Cells[6].Value,
+                    Memo = (string)PurchaseList.Rows[e.RowIndex].Cells[7].Value ?? string.Empty
                 };
-                FormPurchaseDetail formPurchaseDetail = new(param);
+
+                FormPurchaseDetail formPurchaseDetail = new(purchaseDto);
                 formPurchaseDetail.Show();
             }
 

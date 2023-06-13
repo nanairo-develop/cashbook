@@ -32,6 +32,37 @@ namespace cashbook.dao
                 ;
                 """;
         }
+        public static string GetSelectDuplicate(TPurchaseDto tPurchaseDto)
+        {
+            return $"""
+                SELECT
+                    COUNT(id) AS cnt
+                FROM
+                    t_purchase
+                WHERE
+                    payDate = '{tPurchaseDto.PayDate:d}'
+                AND destination = {tPurchaseDto.Destination}
+                AND slipNumber = '{tPurchaseDto.SlipNumber}'
+                ;
+                """;
+        }
+        public static string GetSelectPurchase(int purchaseId)
+        {
+            return $"""
+                SELECT
+                    id,
+                    payDate,
+                    destination,
+                    manager,
+                    slipNumber,
+                    memo
+                FROM
+                    t_purchase
+                WHERE
+                    id = {purchaseId}
+                ;
+                """;
+        }
 
     }
 }

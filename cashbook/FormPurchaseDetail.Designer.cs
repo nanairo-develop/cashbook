@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             DatePickerLabel = new Label();
             ComboOfficeLabel = new Label();
             ComboManagerLabel = new Label();
@@ -47,6 +47,7 @@
             Memo = new TextBox();
             OfficeSelect = new Button();
             RowAdd = new Button();
+            NewInsert = new Button();
             ((System.ComponentModel.ISupportInitialize)DetailList).BeginInit();
             ((System.ComponentModel.ISupportInitialize)SumData).BeginInit();
             SuspendLayout();
@@ -83,7 +84,7 @@
             ComboManager.FormattingEnabled = true;
             ComboManager.Location = new Point(521, 6);
             ComboManager.Name = "ComboManager";
-            ComboManager.Size = new Size(121, 23);
+            ComboManager.Size = new Size(100, 23);
             ComboManager.TabIndex = 2;
             ComboManager.KeyDown += ComboManager_KeyDown;
             ComboManager.Leave += ComboManager_Leave;
@@ -101,14 +102,14 @@
             // DetailList
             // 
             DetailList.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = SystemColors.Window;
-            dataGridViewCellStyle1.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = SystemColors.ControlText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.False;
-            DetailList.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Window;
+            dataGridViewCellStyle2.Font = new Font("BIZ UDゴシック", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
+            DetailList.DefaultCellStyle = dataGridViewCellStyle2;
             DetailList.Location = new Point(12, 71);
             DetailList.Name = "DetailList";
             DetailList.RowTemplate.Height = 25;
@@ -186,7 +187,7 @@
             MessageArea.Multiline = true;
             MessageArea.Name = "MessageArea";
             MessageArea.ScrollBars = ScrollBars.Vertical;
-            MessageArea.Size = new Size(674, 74);
+            MessageArea.Size = new Size(593, 74);
             MessageArea.TabIndex = 9;
             // 
             // DatePicker
@@ -231,11 +232,22 @@
             RowAdd.UseVisualStyleBackColor = true;
             RowAdd.Click += RowAdd_Click;
             // 
+            // NewInsert
+            // 
+            NewInsert.Location = new Point(611, 362);
+            NewInsert.Name = "NewInsert";
+            NewInsert.Size = new Size(75, 23);
+            NewInsert.TabIndex = 16;
+            NewInsert.Text = "新規入力";
+            NewInsert.UseVisualStyleBackColor = true;
+            NewInsert.Click += NewInsert_Click;
+            // 
             // FormPurchaseDetail
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(700, 450);
+            Controls.Add(NewInsert);
             Controls.Add(RowAdd);
             Controls.Add(OfficeSelect);
             Controls.Add(Memo);
@@ -283,5 +295,6 @@
         private TextBox Memo;
         private Button OfficeSelect;
         private Button RowAdd;
+        private Button NewInsert;
     }
 }

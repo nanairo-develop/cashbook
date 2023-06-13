@@ -3,16 +3,16 @@ using cashbook.dto;
 using MySqlConnector;
 using System.Data;
 using System.Globalization;
-using static cashbook.common.ComConst.Mode;
+using static cashbook.common.ComConst.FormPurchaseDetail;
 using static cashbook.common.ComConst.FormPurchaseDetail.DataSumColumns;
 using static cashbook.common.ComConst.FormPurchaseDetail.DetailListColumns;
+using static cashbook.common.ComConst.Mode;
 using static cashbook.common.ComControl;
 using static cashbook.common.ComValidation;
 using static cashbook.dao.MManagerDao;
 using static cashbook.dao.MOfficeDao;
 using static cashbook.dao.TPurchaseDao;
 using static cashbook.dao.TPurchaseDetailDao;
-using static cashbook.common.ComConst.FormPurchaseDetail;
 
 namespace cashbook
 {
@@ -20,7 +20,7 @@ namespace cashbook
     {
         #region メンバ変数
         private int purchaseId;
-        private readonly int managerId;
+        private int managerId;
 
         private readonly DataTable office = new();
         private readonly DataTable manager = new();
@@ -33,21 +33,8 @@ namespace cashbook
         /// <summary>
         /// 子画面値設定待ち状態 true:待ち
         /// </summary>
-        public bool Wait { get; set; }
+        private bool Wait { get; set; }
         #endregion プロパティ
-
-        /// <summary>
-        /// コンストラクタ用のパラメータ構造体
-        /// </summary>
-        public struct Param
-        {
-            public int id;
-            public DateTime payDate;
-            public int officeId;
-            public int managerId;
-            public string slipNumber;
-            public object memo;
-        }
 
         #region コンストラクタ
         /// <summary>
@@ -58,27 +45,18 @@ namespace cashbook
             InitializeComponent();
             managerId = 0;
             OfficeId = 0;
-            Insert.Enabled = true;
-            Change.Enabled = false;
-            Wait = false;
+            SetInsertOrChange(true);
         }
 
         /// <summary>
         /// 明細をクリックしたときのコンストラクタ
         /// </summary>
-        /// <param name="param"></param>
-        public FormPurchaseDetail(Param param)
+        /// <param name="purchaseDto"></param>
+        public FormPurchaseDetail(TPurchaseDto purchaseDto)
         {
             InitializeComponent();
-            purchaseId = param.id;
-            DatePicker.Value = param.payDate;
-            managerId = param.managerId;
-            OfficeId = param.officeId;
-            SlipNumber.Text = param.slipNumber;
-            Memo.Text = param.memo.ToString();
-            Insert.Enabled = false;
-            Change.Enabled = true;
-            Wait = false;
+            SetFormParam(purchaseDto);
+            SetInsertOrChange(false);
         }
         #endregion コンストラクタ
 
@@ -91,42 +69,7 @@ namespace cashbook
         /// <param name="e"></param>
         private void FormPurchaseDetail_Load(object sender, EventArgs e)
         {
-            // コンボボックスの設定
-            ComboBoxParam comboManager = new()
-            {
-                dt = manager,
-                query = GetSelectManager(DatePicker.Value),
-                comboBox = ComboManager,
-                displayMember = "name",
-                valueMember = "id"
-            };
-            SetComboBox(comboManager);
-
-            ComboBoxParam comboOffice = new()
-            {
-                dt = office,
-                query = GetSelectOffice(),
-                comboBox = ComboOffice,
-                displayMember = "name",
-                valueMember = "id"
-            };
-            SetComboBox(comboOffice);
-
-            ComboManager.SelectedValue = managerId;
-            ComboOffice.SelectedValue = OfficeId;
-
-            // 伝票明細の設定
-            SetDetailList();
-
-            // 合計欄の設定
-            SumData.AllowUserToAddRows = false;
-            _ = SumData.Rows.Add(SumAmount(receivable), SumAmount(payable));
-            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Format = "c";
-
-            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Format = "c";
-
+            Init();
         }
 
         /// <summary>
@@ -152,9 +95,10 @@ namespace cashbook
         private void DatePicker_Leave(object sender, EventArgs e)
         {
             // 未来日付はNG
-            MessageArea.Text += CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
+            MessageArea.Text += CheckFuture(DatePicker.Value, DatePickerLabel);
 
-            // TODO: 30日以上前の日付の場合警告を出す
+            // 30日以上前の日付の場合警告を出す
+            MessageArea.Text += CheckPast(DatePicker.Value, DatePickerLabel);
         }
 
         #region ComboManager
@@ -276,7 +220,11 @@ namespace cashbook
                     {
                         if (!int.TryParse(DetailList.EditingControl.Text, styles, provider, out _))
                         {
-                            _ = MessageBox.Show("整数を入力してください。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            _ = MessageBox.Show(
+                                "整数を入力してください。",
+                                "入力エラー",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
                         }
                         else
                         {
@@ -326,18 +274,51 @@ namespace cashbook
                 return;
             };
 
+            string warningMessage = string.Empty;
             // 警告処理
-            if (IsWarning())
+            if (IsWarning(ref warningMessage))
             {
-                return;
+                DialogResult result = MessageBox.Show(warningMessage, "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (result == DialogResult.No)
+                {
+                    MessageArea.Text = warningMessage;
+                    // 処理中断する
+                    return;
+                }
             }
 
             // Insert
             ExecInsert();
 
             // 実行結果メッセージ表示
+            DialogResult displayAnswer = MessageBox.Show(
+                "登録されました。内容を再表示しますか？",
+                "再表示",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+            if (displayAnswer == DialogResult.Yes)
+            {
+                // 再表示ロジック
+                // 再検索する
+                DataTable dt = SelectPurchase();
 
-            // 画面再読み込み
+                TPurchaseDto purchaseDto = TPurchaseDto.GetFormPurchaseDetailParam(dt);
+
+                SetFormParam(purchaseDto);
+                SetInsertOrChange(false);
+
+                Init();
+            }
+            else if (displayAnswer == DialogResult.No)
+            {
+                // 新規登録画面
+                purchaseId = 0;
+                managerId = 0;
+                OfficeId = 0;
+                SetInsertOrChange(true);
+
+                Init();
+            }
 
         }
 
@@ -346,9 +327,91 @@ namespace cashbook
             // Delete-Insertで登録する
         }
 
+        private void NewInsert_Click(object sender, EventArgs e)
+        {
+            purchaseId = 0;
+            managerId = 0;
+            OfficeId = 0;
+            SetInsertOrChange(true);
+
+            Init();
+        }
         #endregion イベント
 
         #region メソッド
+        private void SetFormParam(TPurchaseDto purchaseDto)
+        {
+            purchaseId = purchaseDto.Id;
+            DatePicker.Value = purchaseDto.PayDate;
+            managerId = purchaseDto.Manager;
+            OfficeId = purchaseDto.Destination;
+            SlipNumber.Text = purchaseDto.SlipNumber;
+            Memo.Text = purchaseDto.Memo;
+        }
+
+        /// <summary>
+        /// 登録ボタン更新ボタンの有効設定を行う
+        /// </summary>
+        /// <param name="mode">true:登録ボタンを有効にする</param>
+        private void SetInsertOrChange(bool mode)
+        {
+            if (mode)
+            {
+                Insert.Enabled = true;
+                Change.Enabled = false;
+            }
+            else
+            {
+                Insert.Enabled = false;
+                Change.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// Form_Lordイベントの中身
+        /// </summary>
+        private void Init()
+        {
+            // 子画面起動モードではない
+            Wait = false;
+
+            // コンボボックスの設定
+            ComboBoxParam comboManager = new()
+            {
+                dt = manager,
+                query = GetSelectManager(DatePicker.Value),
+                comboBox = ComboManager,
+                displayMember = "name",
+                valueMember = "id"
+            };
+            SetComboBox(comboManager);
+
+            ComboBoxParam comboOffice = new()
+            {
+                dt = office,
+                query = GetSelectOffice(),
+                comboBox = ComboOffice,
+                displayMember = "name",
+                valueMember = "id"
+            };
+            SetComboBox(comboOffice);
+
+            ComboManager.SelectedValue = managerId;
+            ComboOffice.SelectedValue = OfficeId;
+
+            // 伝票明細の設定
+            SetDetailList();
+
+            // 合計欄の設定
+            SumData.AllowUserToAddRows = false;
+            _ = SumData.Rows.Add(SumAmount(receivable), SumAmount(payable));
+            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            ComControl.Columns(SumData, receivableSum).DefaultCellStyle.Format = "c";
+
+            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+            ComControl.Columns(SumData, payableSum).DefaultCellStyle.Format = "c";
+        }
+
         /// <summary>
         /// 指令された列の合計を出力する
         /// </summary>
@@ -364,6 +427,7 @@ namespace cashbook
             return sum;
         }
 
+
         #region 検索処理
         /// <summary>
         /// Selectした内容をDataGridViewに設定する
@@ -372,7 +436,7 @@ namespace cashbook
         {
             DetailList.AllowUserToAddRows = false;
             DetailList.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            GetPurchaseDetails();
+            SelectPurchaseDetails();
             DetailList.DataSource = DetailListDataTable;
             ComControl.Columns(DetailList, description).Width = 200;
             ComControl.Columns(DetailList, description).DefaultCellStyle.WrapMode = DataGridViewTriState.True;
@@ -386,7 +450,7 @@ namespace cashbook
         /// <remarks>
         /// 戻り値はないが、メソッド内でメンバ変数に設定している
         /// </remarks>
-        private void GetPurchaseDetails()
+        private void SelectPurchaseDetails()
         {
             using MySqlConnection conn = new(ComConst.connStr);
 
@@ -423,6 +487,53 @@ namespace cashbook
                 _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             return ret;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>キーと一致する行数</returns>
+        private static int SelectDuplicate(TPurchaseDto purchaseDto)
+        {
+            using MySqlConnection conn = new(ComConst.connStr);
+            // 接続を開く
+            conn.Open();
+            int ret = 0;
+            using MySqlCommand command = conn.CreateCommand();
+            try
+            {
+                command.CommandText = GetSelectDuplicate(purchaseDto);
+
+                object? scalar = command.ExecuteScalar();
+                ret = scalar is not null ? (int)scalar : throw new InvalidOperationException(message: "SELECT失敗");
+            }
+            catch (MySqlException mse)
+            {
+                _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return ret;
+        }
+
+        private DataTable SelectPurchase()
+        {
+            DataTable dt = new();
+
+            using MySqlConnection conn = new(ComConst.connStr);
+            // 接続を開く
+            conn.Open();
+            using MySqlCommand command = conn.CreateCommand();
+            try
+            {
+                command.CommandText = GetSelectPurchase(purchaseId);
+
+                MySqlDataReader dr = command.ExecuteReader();
+                dt.Load(dr);
+            }
+            catch (MySqlException mse)
+            {
+                _ = MessageBox.Show(mse.Message, "データ取得エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return dt;
         }
 
         #endregion 検索処理
@@ -544,7 +655,7 @@ namespace cashbook
 
             // 日付
             // 未来日付はNG
-            MessageArea.Text = CheckGreaterThan(DatePicker.Value, DateTime.Now, DatePickerLabel);
+            MessageArea.Text = CheckFuture(DatePicker.Value, DatePickerLabel);
 
             // 担当者
             // 担当者指定なしはNG
@@ -590,16 +701,47 @@ namespace cashbook
         /// <summary>
         /// 警告処理
         /// </summary>
-        /// <returns>true:警告中断</returns>
-        private bool IsWarning()
+        /// <returns>true:警告あり</returns>
+        private bool IsWarning(ref string warningMessage)
         {
-            bool ret = false;
             // 30日以上前の日付の場合警告を出す
-            // TODO: 
+            warningMessage += CheckPast(DatePicker.Value, DatePickerLabel);
 
             // 同じ日付、同じ相手先、同じ伝票番号の場合警告を出す
+            warningMessage += CheckDuplicate();
 
-            return ret;
+            if (warningMessage != string.Empty)
+            {
+                warningMessage += "登録を続行しますか";
+            }
+
+            return warningMessage != string.Empty;
+        }
+
+        /// <summary>
+        /// 同じ日付、同じ相手先、同じ伝票番号の場合警告を出す
+        /// </summary>
+        /// <returns></returns>
+        private string CheckDuplicate()
+        {
+            string warningMessage = string.Empty;
+
+            // 対応するキーをコントロールから取得
+            TPurchaseDto purchaseDto = new(ComboOffice.SelectedValue, ComboManager.SelectedValue)
+            {
+                PayDate = DatePicker.Value,
+                SlipNumber = SlipNumber.Text,
+                Memo = Memo.Text
+            };
+
+            // キーでDBを検索
+            if (SelectDuplicate(purchaseDto) > 0)
+            {
+                // 1行以上ヒットすれば警告メッセージを詰め込む
+                warningMessage += "同じ日付、同じ伝票番号の領収書が登録済みです";
+            };
+
+            return warningMessage;
         }
         #endregion チェック処理
         #endregion メソッド
