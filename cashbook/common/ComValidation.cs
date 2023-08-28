@@ -75,7 +75,6 @@ namespace cashbook.common
             return errorMessage;
         }
 
-        // TODO: 本日よりと言っていてメッセージが変
         public static string CheckGreaterThan(DateTime datetimeFirst, DateTime dateTimeSecond, Label label)
         {
             string errorMessage = string.Empty;

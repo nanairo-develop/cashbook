@@ -97,6 +97,7 @@ namespace cashbook
             // 未来日付はNG
             MessageArea.Text += CheckFuture(DatePicker.Value, DatePickerLabel);
 
+            // TODO: 過去データを読みだした時にも反応してしまう。
             // 30日以上前の日付の場合警告を出す
             MessageArea.Text += CheckPast(DatePicker.Value, DatePickerLabel);
         }
@@ -214,7 +215,6 @@ namespace cashbook
                     // 整数値変換できる値かチェックする
                     CultureInfo provider = new("ja-JP");
                     NumberStyles styles = NumberStyles.Integer
-                                            | NumberStyles.AllowCurrencySymbol
                                             | NumberStyles.AllowThousands;
                     if (DetailList.EditingControl is not null)
                     {
@@ -342,6 +342,7 @@ namespace cashbook
         private void SetFormParam(TPurchaseDto purchaseDto)
         {
             purchaseId = purchaseDto.Id;
+            // TODO: 日付が反映されていない
             DatePicker.Value = purchaseDto.PayDate;
             managerId = purchaseDto.Manager;
             OfficeId = purchaseDto.Destination;

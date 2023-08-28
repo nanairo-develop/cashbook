@@ -1,10 +1,11 @@
-﻿using System.Data;
+﻿using cashbook.common;
+using System.Data;
 
 namespace cashbook.dto
 {
     public class TPurchaseDto
     {
-        public enum TPurchaseColumns 
+        public enum TPurchaseColumns
         {
             id = 0,
             payDate,
@@ -77,15 +78,15 @@ namespace cashbook.dto
 
         public static TPurchaseDto GetFormPurchaseDetailParam(DataTable dt)
         {
-            DataRow dr = dt.Rows[1];
+            DataRow dr = dt.Rows[0];
             TPurchaseDto purchaseDto = new()
             {
-                Id = (int)dr[0],
-                PayDate = (DateTime)dr[1],
-                Destination = (int)dr[2],
-                Manager = (int)dr[3],
-                SlipNumber = dr[4].ToString() ?? string.Empty,
-                Memo = dr[5].ToString() ?? string.Empty
+                Id = (int)ComDataTable.Data(dr, TPurchaseColumns.id),
+                PayDate = (DateTime)ComDataTable.Data(dr, TPurchaseColumns.payDate),
+                Destination = (int)ComDataTable.Data(dr, TPurchaseColumns.destination),
+                Manager = (int)ComDataTable.Data(dr, TPurchaseColumns.manager),
+                SlipNumber = ComDataTable.Data(dr, TPurchaseColumns.slipNumber).ToString() ?? string.Empty,
+                Memo = ComDataTable.Data(dr, TPurchaseColumns.memo).ToString() ?? string.Empty
             };
 
             return purchaseDto;

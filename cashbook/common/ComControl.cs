@@ -1,6 +1,5 @@
 ﻿using MySqlConnector;
 using System.Data;
-using static cashbook.common.ComConst.FormPurchaseDetail;
 
 namespace cashbook.common
 {
@@ -98,6 +97,7 @@ namespace cashbook.common
             comboBox.BackColor = SystemColors.Window;
         }
         #endregion ComboBox
+
         #region NumericUpDown
         public static void SetErrorNumericUpDownColor(NumericUpDown numericUpDown)
         {

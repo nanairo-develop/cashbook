@@ -37,30 +37,13 @@
         public DateTime Value
         {
             get => DatePicker.Value;
-            set
-            {
-                DatePicker.Value = Value;
-            }
+            set => DatePicker.Value = Value;
         }
         #region コンストラクタ
         public UserDateCombo()
         {
             InitializeComponent();
         }
-        //public UserDateCombo(int year, int month, int day)
-        //{
-        //    InitializeComponent();
-        //    IntYear = year;
-        //    IntMonth = month;
-        //    IntDay = day;
-        //    ErrorMessage = string.Empty;
-        //}
-        //public UserDateCombo(DateTime dateTime)
-        //{
-        //    InitializeComponent();
-        //    Value = dateTime;
-        //    ErrorMessage = string.Empty;
-        //}
         #endregion コンストラクタ
 
         #region イベント
