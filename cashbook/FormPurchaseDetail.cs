@@ -342,8 +342,7 @@ namespace cashbook
         private void SetFormParam(TPurchaseDto purchaseDto)
         {
             purchaseId = purchaseDto.Id;
-            // TODO: 日付が反映されていない
-            DatePicker.Value = purchaseDto.PayDate;
+            DatePicker.SetValue(purchaseDto.PayDate);
             managerId = purchaseDto.Manager;
             OfficeId = purchaseDto.Destination;
             SlipNumber.Text = purchaseDto.SlipNumber;

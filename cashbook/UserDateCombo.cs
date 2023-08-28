@@ -118,6 +118,14 @@
             DatePicker.Value = new(IntYear, IntMonth, IntDay);
         }
 
+        public void SetValue(DateTime dateTime)
+        {
+            Value = dateTime;
+            TextYear = dateTime.Year.ToString();
+            TextMonth = dateTime.Month.ToString();
+            TextDay = dateTime.Day.ToString();
+        }
+
         public bool IsDispValue()
         {
             bool ret = true;
