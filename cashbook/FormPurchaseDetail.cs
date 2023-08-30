@@ -34,6 +34,7 @@ namespace cashbook
         /// 子画面値設定待ち状態 true:待ち
         /// </summary>
         private bool Wait { get; set; }
+        private DateTime TempDateTime { get; set; }
         #endregion プロパティ
 
         #region コンストラクタ
@@ -94,12 +95,18 @@ namespace cashbook
         /// <param name="e"></param>
         private void DatePicker_Leave(object sender, EventArgs e)
         {
-            // 未来日付はNG
-            MessageArea.Text += CheckFuture(DatePicker.Value, DatePickerLabel);
+            DateTime value = DatePicker.Value;
 
-            // TODO: 過去データを読みだした時にも反応してしまう。
-            // 30日以上前の日付の場合警告を出す
-            MessageArea.Text += CheckPast(DatePicker.Value, DatePickerLabel);
+            // 未来日付はNG
+            MessageArea.Text += CheckFuture(value, DatePickerLabel);
+
+            // 過去データを読みだした時に反応しないように
+            // 直前に読み込まれた情報と同じ場合はエラーの扱いにはしない
+            if (TempDateTime != value)
+            {
+                // 30日以上前の日付の場合警告を出す
+                MessageArea.Text += CheckPast(value, DatePickerLabel);
+            }
         }
 
         #region ComboManager
@@ -278,7 +285,11 @@ namespace cashbook
             // 警告処理
             if (IsWarning(ref warningMessage))
             {
-                DialogResult result = MessageBox.Show(warningMessage, "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult result = MessageBox.Show(
+                    warningMessage,
+                    "警告",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
                 if (result == DialogResult.No)
                 {
                     MessageArea.Text = warningMessage;
@@ -375,6 +386,9 @@ namespace cashbook
             // 子画面起動モードではない
             Wait = false;
 
+            // 読み込み時の日付を保持する
+            TempDateTime = DatePicker.Value;
+
             // コンボボックスの設定
             ComboBoxParam comboManager = new()
             {
@@ -453,6 +467,8 @@ namespace cashbook
         private void SelectPurchaseDetails()
         {
             using MySqlConnection conn = new(ComConst.connStr);
+
+            DetailListDataTable.Clear();
 
             // 接続を開く
             conn.Open();
