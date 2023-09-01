@@ -37,7 +37,7 @@
         public DateTime Value
         {
             get => DatePicker.Value;
-            set => DatePicker.Value = Value;
+            set => DatePicker.Value = value;
         }
         #region コンストラクタ
         public UserDateCombo()
@@ -92,14 +92,7 @@
         private void SetDayNumericUpdown(int intDay)
         {
             TimeSpan subst = new(1, 0, 0, 0);
-            if (IntMonth < 12)
-            {
-                Day.Maximum = (new DateTime(IntYear, IntMonth + 1, 1) - subst).Day;
-            }
-            else
-            {
-                Day.Maximum = 31;
-            }
+            Day.Maximum = IntMonth < 12 ? (new DateTime(IntYear, IntMonth + 1, 1) - subst).Day : 31;
             // 年、月が変わることで末日が変わる場合、
             // 日付として妥当な末日に置き換える
             if (intDay <= Day.Maximum)

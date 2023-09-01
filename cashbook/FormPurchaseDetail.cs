@@ -345,6 +345,9 @@ namespace cashbook
             OfficeId = 0;
             SetInsertOrChange(true);
 
+            TPurchaseDto purchaseDto = new(date: DateTime.Now, destination: OfficeId, manager: managerId, slipNumber: "", memo: "");
+            SetFormParam(purchaseDto);
+
             Init();
         }
         #endregion イベント
