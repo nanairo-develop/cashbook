@@ -336,19 +336,88 @@ namespace cashbook
         private void Change_Click(object sender, EventArgs e)
         {
             // Delete-Insertで登録する
+            // MessageAreaの初期化
+            MessageArea.Text = string.Empty;
+
+            // チェック処理
+            if (!IsValidation())
+            {
+                return;
+            };
+
+            string warningMessage = string.Empty;
+            // 警告処理
+            if (IsWarning(ref warningMessage))
+            {
+                DialogResult result = MessageBox.Show(
+                    warningMessage,
+                    "警告",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+                if (result == DialogResult.No)
+                {
+                    MessageArea.Text = warningMessage;
+                    // 処理中断する
+                    return;
+                }
+            }
+
+            // Delete
+            ExecDelete();
+
+            // Insert
+            ExecInsert();
+
+            // 実行結果メッセージ表示
+            DialogResult displayAnswer = MessageBox.Show(
+                "登録されました。内容を再表示しますか？",
+                "再表示",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information);
+            if (displayAnswer == DialogResult.Yes)
+            {
+                // 再表示ロジック
+                // 再検索する
+                DataTable dt = SelectPurchase();
+
+                TPurchaseDto purchaseDto = TPurchaseDto.GetFormPurchaseDetailParam(dt);
+
+                SetFormParam(purchaseDto);
+                SetInsertOrChange(false);
+
+                Init();
+            }
+            else if (displayAnswer == DialogResult.No)
+            {
+                // 新規登録画面
+                purchaseId = 0;
+                managerId = 0;
+                OfficeId = 0;
+                SetInsertOrChange(true);
+
+                Init();
+            }
         }
 
         private void NewInsert_Click(object sender, EventArgs e)
         {
+            // 初期化処理
             purchaseId = 0;
             managerId = 0;
             OfficeId = 0;
+            SumData.Rows.RemoveAt(0);
             SetInsertOrChange(true);
 
-            TPurchaseDto purchaseDto = new(date: DateTime.Now, destination: OfficeId, manager: managerId, slipNumber: "", memo: "");
+            TPurchaseDto purchaseDto = new(
+                date: DateTime.Now,
+                destination: OfficeId,
+                manager: managerId,
+                slipNumber: string.Empty,
+                memo: string.Empty);
             SetFormParam(purchaseDto);
 
             Init();
+
         }
         #endregion イベント
 
@@ -369,16 +438,8 @@ namespace cashbook
         /// <param name="mode">true:登録ボタンを有効にする</param>
         private void SetInsertOrChange(bool mode)
         {
-            if (mode)
-            {
-                Insert.Enabled = true;
-                Change.Enabled = false;
-            }
-            else
-            {
-                Insert.Enabled = false;
-                Change.Enabled = true;
-            }
+            Insert.Enabled = mode;
+            Change.Enabled = !mode;
         }
 
         /// <summary>
@@ -557,9 +618,9 @@ namespace cashbook
 
         #endregion 検索処理
 
-        #region 更新処理
+        #region 新規登録処理
         /// <summary>
-        /// 更新処理まとめ
+        /// 新規登録処理まとめ
         /// </summary>
         private void ExecInsert()
         {
@@ -569,6 +630,8 @@ namespace cashbook
             using MySqlTransaction transaction = conn.BeginTransaction();
             try
             {
+                // TODO: 作成中
+
                 // ヘダー行Insert
                 InsertPurchase(conn, transaction);
 
@@ -661,7 +724,35 @@ namespace cashbook
             }
 
         }
-        #endregion 更新処理
+        #endregion 新規登録処理
+
+        #region 削除処理
+        private void ExecDelete()
+        {
+            // TODO: 作成中
+            using MySqlConnection conn = new(ComConst.connStr);
+            // 接続を開く
+            conn.Open();
+            using MySqlTransaction transaction = conn.BeginTransaction();
+            try
+            {
+                // 明細行Delete
+                DeletePurchaseDetail(purchaseId, conn, transaction);
+                transaction.Commit();
+
+            }
+            catch (Exception me)
+            {
+                transaction.Rollback();
+                _ = MessageBox.Show("ERROR: " + me.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        #endregion 削除処理
 
         #region チェック処理
         /// <summary>

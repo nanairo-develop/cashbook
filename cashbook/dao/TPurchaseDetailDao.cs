@@ -56,5 +56,13 @@ namespace cashbook.dao
                 ;
                 """;
         }
+        public static string GetDeletePurchaseDetail(TPurchaseDetailDto purchaseDetailDto)
+        {
+            return $"""
+                DELETE FROM t_purchaseDetail
+                WHERE purchaseId = {purchaseDetailDto.PurchaseId}
+                ;
+                """;
+        }
     }
 }
