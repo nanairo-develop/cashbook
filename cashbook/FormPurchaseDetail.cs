@@ -362,12 +362,10 @@ namespace cashbook
                 }
             }
 
-            // Delete
-            ExecDelete();
-
-            // Insert
-            ExecInsert();
-
+            // TODO: 作成中
+            // Delete-Insert
+            ExecDeleteInsert();
+            
             // 実行結果メッセージ表示
             DialogResult displayAnswer = MessageBox.Show(
                 "登録されました。内容を再表示しますか？",
@@ -630,8 +628,6 @@ namespace cashbook
             using MySqlTransaction transaction = conn.BeginTransaction();
             try
             {
-                // TODO: 作成中
-
                 // ヘダー行Insert
                 InsertPurchase(conn, transaction);
 
@@ -725,7 +721,44 @@ namespace cashbook
 
         }
         #endregion 新規登録処理
+        #region 更新処理
+        /// <summary>
+        /// 更新処理まとめ
+        /// </summary>
+        private void ExecDeleteInsert()
+        {
+            using MySqlConnection conn = new(ComConst.connStr);
+            // 接続を開く
+            conn.Open();
+            using MySqlTransaction transaction = conn.BeginTransaction();
+            try
+            {
+                // TODO: ヘダー行Delete
+                DeletePurchase();
 
+                // ヘダー行Insert
+                InsertPurchase(conn, transaction);
+
+                // TODO: 明細行Delete
+                DeletePurchaseDetail(purchaseId, conn, transaction);
+
+                // 明細行Insert
+                InsertPurchaseDetail(purchaseId, conn, transaction);
+                transaction.Commit();
+
+            }
+            catch (Exception me)
+            {
+                transaction.Rollback();
+                _ = MessageBox.Show("ERROR: " + me.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+        }
+
+        #endregion 更新処理
         #region 削除処理
         private void ExecDelete()
         {
@@ -751,7 +784,31 @@ namespace cashbook
                 conn.Close();
             }
         }
+        /// <summary>
+        /// 伝票明細の削除
+        /// </summary>
+        /// <param name="purchaseId"></param>
+        /// <param name="conn"></param>
+        /// <param name="transaction"></param>
+        private static void DeletePurchaseDetail(int purchaseId, MySqlConnection conn, MySqlTransaction transaction)
+        {
+            TPurchaseDetailDto purchaseDetailDto = new()
+            {
+                PurchaseId = purchaseId
+            };
 
+            using MySqlCommand command = conn.CreateCommand();
+            command.CommandText = GetDeletePurchaseDetails(purchaseDetailDto);
+            command.Transaction = transaction;
+
+            int result = command.ExecuteNonQuery();
+            // 削除されなかった場合
+            if (result != 1)
+            {
+                _ = MessageBox.Show("delete ERROR");
+            }
+
+        }
         #endregion 削除処理
 
         #region チェック処理
