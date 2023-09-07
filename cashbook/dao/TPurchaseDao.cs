@@ -64,5 +64,28 @@ namespace cashbook.dao
                 """;
         }
 
+        public static string GetUpdatePurchase(TPurchaseDto beforePurchaseDto, TPurchaseDto afterPurchaseDto)
+        {
+            string set = string.Empty;
+            if (beforePurchaseDto.PayDate != afterPurchaseDto.PayDate) {
+                set = $"""
+                    payDate = {afterPurchaseDto.PayDate:d},
+                    """;
+            }
+            if (beforePurchaseDto.Destination != afterPurchaseDto.Destination)
+            {
+                set = $"""
+                    {set}
+                    destination = {afterPurchaseDto.Destination},
+                    """;
+            }
+            set = set[..^1];
+            return $"""
+                UPDATE t_purchase
+                SET {set}
+                WHERE
+                    id = {beforePurchaseDto.Id}
+                """;
+        }
     }
 }

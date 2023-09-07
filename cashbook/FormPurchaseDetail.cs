@@ -733,16 +733,11 @@ namespace cashbook
             using MySqlTransaction transaction = conn.BeginTransaction();
             try
             {
-                // TODO: ヘダー行Delete
-                DeletePurchase();
+                // TODO: ヘダー行Update
+                UpdatePurchase(conn, transaction);
 
-                // ヘダー行Insert
-                InsertPurchase(conn, transaction);
-
-                // TODO: 明細行Delete
-                DeletePurchaseDetail(purchaseId, conn, transaction);
-
-                // 明細行Insert
+                // TODO: 明細行Update
+                // UpdatePurchaseDetail
                 InsertPurchaseDetail(purchaseId, conn, transaction);
                 transaction.Commit();
 
@@ -755,6 +750,79 @@ namespace cashbook
             finally
             {
                 conn.Close();
+            }
+        }
+
+
+
+        /// <summary>
+        /// 伝票の更新
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="transaction"></param>
+        private void UpdatePurchase(MySqlConnection conn, MySqlTransaction transaction)
+        {
+            TPurchaseDto purchaseDto = new(ComboOffice.SelectedValue, ComboManager.SelectedValue)
+            {
+                PayDate = DatePicker.Value,
+                SlipNumber = SlipNumber.Text,
+                Memo = Memo.Text
+            };
+            string query = GetUpdatePurchase(purchaseDto);
+
+            using MySqlCommand command = conn.CreateCommand();
+            command.CommandText = query;
+            command.Transaction = transaction;
+
+            int result = command.ExecuteNonQuery();
+            // 挿入されなかった場合
+            if (result != 1)
+            {
+                _ = MessageBox.Show("update ERROR");
+            }
+        }
+
+
+        /// <summary>
+        /// 伝票明細の更新
+        /// </summary>
+        /// <param name="purchaseId"></param>
+        /// <param name="conn"></param>
+        /// <param name="transaction"></param>
+        private void UpdatePurchaseDetail(int purchaseId, MySqlConnection conn, MySqlTransaction transaction)
+        {
+            List<TPurchaseDetailDto> purchaseDetailDtos = new();
+            for (int i = 0; i < DetailList.RowCount - 1; i++)
+            {
+                DataGridViewRow rows = DetailList.Rows[i];
+                if (ComControl.Cells(rows, blanchId).Value is null)
+                {
+                    break;
+                }
+                else
+                {
+                    TPurchaseDetailDto purchaseDetailDto = new()
+                    {
+                        PurchaseId = purchaseId,
+                        BranchId = (sbyte)ComControl.Cells(rows, blanchId).Value,
+                        Description = (string)ComControl.Cells(rows, description).Value,
+                        Receivable = (int)ComControl.Cells(rows, receivable).Value,
+                        Payable = (int)ComControl.Cells(rows, payable).Value,
+                        UseForFood = (bool)ComControl.Cells(rows, useforfood).Value
+                    };
+                    purchaseDetailDtos.Add(purchaseDetailDto);
+                }
+            }
+
+            using MySqlCommand command = conn.CreateCommand();
+            command.CommandText = GetUpdatePurchaseDetails(purchaseDetailDtos);
+            command.Transaction = transaction;
+
+            int result = command.ExecuteNonQuery();
+            // 挿入されなかった場合
+            if (result != 1)
+            {
+                _ = MessageBox.Show("update ERROR");
             }
         }
 
