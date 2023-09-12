@@ -3,7 +3,7 @@ using System.Data;
 
 namespace cashbook.common
 {
-    internal static class ComControl
+    public static class ComControl
     {
         #region Label
         public static void SetErrorLabelColor(Label label)

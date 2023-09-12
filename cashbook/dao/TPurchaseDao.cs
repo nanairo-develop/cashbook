@@ -64,6 +64,12 @@ namespace cashbook.dao
                 """;
         }
 
+        /// <summary>
+        /// UpdatePurchase文取得
+        /// </summary>
+        /// <param name="beforePurchaseDto">変更前伝票</param>
+        /// <param name="afterPurchaseDto">変更後伝票</param>
+        /// <returns></returns>
         public static string GetUpdatePurchase(TPurchaseDto beforePurchaseDto, TPurchaseDto afterPurchaseDto)
         {
             string set = string.Empty;
@@ -79,6 +85,7 @@ namespace cashbook.dao
                     destination = {afterPurchaseDto.Destination},
                     """;
             }
+            // TODO: 他の項目を追加
             set = set[..^1];
             return $"""
                 UPDATE t_purchase

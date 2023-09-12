@@ -25,6 +25,7 @@ namespace cashbook
         private readonly DataTable office = new();
         private readonly DataTable manager = new();
         private readonly DataTable DetailListDataTable = new();
+        private TPurchaseDto readPurchaseDto = new();
         #endregion メンバ変数
 
         #region プロパティ
@@ -428,6 +429,10 @@ namespace cashbook
             OfficeId = purchaseDto.Destination;
             SlipNumber.Text = purchaseDto.SlipNumber;
             Memo.Text = purchaseDto.Memo;
+
+            //読み込み時
+            readPurchaseDto = purchaseDto;
+
         }
 
         /// <summary>
@@ -768,7 +773,7 @@ namespace cashbook
                 SlipNumber = SlipNumber.Text,
                 Memo = Memo.Text
             };
-            string query = GetUpdatePurchase(purchaseDto);
+            string query = GetUpdatePurchase(readPurchaseDto, purchaseDto);
 
             using MySqlCommand command = conn.CreateCommand();
             command.CommandText = query;

@@ -64,5 +64,11 @@ namespace cashbook.dao
                 ;
                 """;
         }
+
+        public static string GetUpdatePurchaseDetails(List<TPurchaseDetailDto> purchaseDetailDtos)
+        {
+            // TODO: 中身
+            return "";
+        }
     }
 }
