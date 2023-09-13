@@ -1,4 +1,4 @@
-﻿namespace cashbook.dto
+﻿namespace Cashbook.dto
 {
     internal class MManagerDto
     {

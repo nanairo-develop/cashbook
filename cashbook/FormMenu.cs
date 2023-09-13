@@ -1,6 +1,6 @@
-﻿using static cashbook.common.ComConst.Mode;
+﻿using static Cashbook.common.ComConst.Mode;
 
-namespace cashbook
+namespace Cashbook
 {
     public partial class FormMenu : Form
     {

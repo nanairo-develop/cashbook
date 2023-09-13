@@ -1,7 +1,7 @@
-﻿using cashbook.dto;
+﻿using Cashbook.dto;
 using System.Text;
 
-namespace cashbook.dao
+namespace Cashbook.dao
 {
     internal class MOfficeDao
     {

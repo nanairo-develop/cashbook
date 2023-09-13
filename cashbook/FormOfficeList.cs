@@ -1,10 +1,10 @@
-﻿using cashbook.common;
+﻿using Cashbook.common;
 using MySqlConnector;
 using System.Data;
-using static cashbook.common.ComConst.Mode;
-using static cashbook.dao.MOfficeDao;
+using static Cashbook.common.ComConst.Mode;
+using static Cashbook.dao.MOfficeDao;
 
-namespace cashbook
+namespace Cashbook
 {
     public partial class FormOfficeList : Form
     {

@@ -1,7 +1,7 @@
-﻿using cashbook.common;
+﻿using Cashbook.common;
 using System.Data;
 
-namespace cashbook.dto
+namespace Cashbook.dto
 {
     public class TPurchaseDto
     {

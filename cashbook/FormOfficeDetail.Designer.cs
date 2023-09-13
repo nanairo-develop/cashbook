@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace cashbook
+namespace Cashbook
 {
     partial class FormOfficeDetail
     {

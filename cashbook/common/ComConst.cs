@@ -1,4 +1,4 @@
-﻿namespace cashbook.common
+﻿namespace Cashbook.common
 {
     public class ComConst
     {

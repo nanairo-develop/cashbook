@@ -1,7 +1,7 @@
 ﻿using MySqlConnector;
 using System.Data;
 
-namespace cashbook.common
+namespace Cashbook.common
 {
     public static class ComControl
     {

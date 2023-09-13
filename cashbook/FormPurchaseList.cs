@@ -1,14 +1,14 @@
-using cashbook.common;
-using cashbook.dto;
+using Cashbook.common;
+using Cashbook.dto;
 using MySqlConnector;
 using System.Data;
-using static cashbook.common.ComControl;
-using static cashbook.dao.MManagerDao;
-using static cashbook.dao.MOfficeDao;
-using static cashbook.FormPurchaseListDao;
-using static cashbook.FormPurchaseListDto.PurchaseListColumns;
+using static Cashbook.common.ComControl;
+using static Cashbook.dao.MManagerDao;
+using static Cashbook.dao.MOfficeDao;
+using static Cashbook.FormPurchaseListDao;
+using static Cashbook.FormPurchaseListDto.PurchaseListColumns;
 
-namespace cashbook
+namespace Cashbook
 {
     /// <summary>“`•[ˆê——-FormPurchaseList</summary>
     public partial class FormPurchaseList : Form

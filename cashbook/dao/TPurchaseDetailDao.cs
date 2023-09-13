@@ -1,6 +1,6 @@
-﻿using cashbook.dto;
+﻿using Cashbook.dto;
 
-namespace cashbook.dao
+namespace Cashbook.dao
 {
     internal class TPurchaseDetailDao
     {

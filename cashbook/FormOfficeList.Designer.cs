@@ -1,4 +1,4 @@
-﻿namespace cashbook
+﻿namespace Cashbook
 {
     partial class FormOfficeList
     {

@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\cashbook\Cashbook.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="cashbook">
       <HintPath>..\cashbook\bin\Debug\net7.0-windows\cashbook.dll</HintPath>
     </Reference>

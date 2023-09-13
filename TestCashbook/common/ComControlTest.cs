@@ -1,15 +1,16 @@
-using cashbook.common;
+using Cashbook.common;
 
-namespace TestCashbook.common
+namespace TestsCashbook.common
 {
-    [TestClass]
-    public class ComCotrolTest
+    [TestClass()]
+    public class ComControlTest
     {
+
         [TestMethod]
-        public void TestSetErrorLabelColor()
+        public void SetErrorLabelColorTest()
         {
             // 期待値設定
-            object e = Color.Red;
+            object expected = Color.Red;
 
             // パラメータ設定
             Label label = new();
@@ -18,9 +19,22 @@ namespace TestCashbook.common
             ComControl.SetErrorLabelColor(label);
 
             // 実効値設定
-            object a = label.BackColor;
+            object actual = label.BackColor;
 
-            Assert.AreEqual(e,a);
+            Assert.AreEqual(expected, actual);
+        }
+
+
+        [TestMethod()]
+        public void SetClearLabelColorTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void SetClearColorTest()
+        {
+
         }
     }
 }

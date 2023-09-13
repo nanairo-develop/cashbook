@@ -1,6 +1,6 @@
 ﻿using MySqlConnector;
 
-namespace cashbook.common
+namespace Cashbook.common
 {
     internal class ComDataBaseAccess
     {

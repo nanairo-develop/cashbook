@@ -1,20 +1,20 @@
-﻿using cashbook.common;
-using cashbook.dto;
+﻿using Cashbook.common;
+using Cashbook.dto;
 using MySqlConnector;
 using System.Data;
 using System.Globalization;
-using static cashbook.common.ComConst.FormPurchaseDetail;
-using static cashbook.common.ComConst.FormPurchaseDetail.DataSumColumns;
-using static cashbook.common.ComConst.FormPurchaseDetail.DetailListColumns;
-using static cashbook.common.ComConst.Mode;
-using static cashbook.common.ComControl;
-using static cashbook.common.ComValidation;
-using static cashbook.dao.MManagerDao;
-using static cashbook.dao.MOfficeDao;
-using static cashbook.dao.TPurchaseDao;
-using static cashbook.dao.TPurchaseDetailDao;
+using static Cashbook.common.ComConst.FormPurchaseDetail;
+using static Cashbook.common.ComConst.FormPurchaseDetail.DataSumColumns;
+using static Cashbook.common.ComConst.FormPurchaseDetail.DetailListColumns;
+using static Cashbook.common.ComConst.Mode;
+using static Cashbook.common.ComControl;
+using static Cashbook.common.ComValidation;
+using static Cashbook.dao.MManagerDao;
+using static Cashbook.dao.MOfficeDao;
+using static Cashbook.dao.TPurchaseDao;
+using static Cashbook.dao.TPurchaseDetailDao;
 
-namespace cashbook
+namespace Cashbook
 {
     public partial class FormPurchaseDetail : Form
     {

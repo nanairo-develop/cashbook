@@ -1,7 +1,7 @@
-﻿using static cashbook.common.ComControl;
+﻿using static Cashbook.common.ComControl;
 
 
-namespace cashbook.common
+namespace Cashbook.common
 {
     internal class ComValidation
     {

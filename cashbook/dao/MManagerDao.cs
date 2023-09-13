@@ -1,4 +1,4 @@
-﻿namespace cashbook.dao
+﻿namespace Cashbook.dao
 {
     internal class MManagerDao
     {

@@ -1,12 +1,12 @@
-﻿using cashbook.common;
-using cashbook.dto;
+﻿using Cashbook.common;
+using Cashbook.dto;
 using MySqlConnector;
-using static cashbook.common.ComControl;
-using static cashbook.common.ComDataBaseAccess;
-using static cashbook.common.ComValidation;
-using static cashbook.dao.MOfficeDao;
+using static Cashbook.common.ComControl;
+using static Cashbook.common.ComDataBaseAccess;
+using static Cashbook.common.ComValidation;
+using static Cashbook.dao.MOfficeDao;
 
-namespace cashbook
+namespace Cashbook
 {
     public partial class FormOfficeDetail : Form
     {

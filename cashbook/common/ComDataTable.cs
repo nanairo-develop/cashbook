@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace cashbook.common
+namespace Cashbook.common
 {
     internal static class ComDataTable
     {

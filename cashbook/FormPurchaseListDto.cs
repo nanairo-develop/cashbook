@@ -1,4 +1,4 @@
-﻿namespace cashbook
+﻿namespace Cashbook
 {
     internal class FormPurchaseListDto
     {

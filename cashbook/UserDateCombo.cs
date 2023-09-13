@@ -1,4 +1,4 @@
-﻿namespace cashbook
+﻿namespace Cashbook
 {
     public partial class UserDateCombo : UserControl
     {
