@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /cashbook/Resource
 /cashbook/validation/RequiredAttribute.cs
+/CoverageReport

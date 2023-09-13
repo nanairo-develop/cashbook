@@ -21,6 +21,8 @@
   <ItemGroup>
     <PackageReference Include="MySqlConnector" Version="2.2.6" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="OpenCover" Version="4.7.1221" />
+    <PackageReference Include="ReportGenerator" Version="5.1.25" />
   </ItemGroup>
 
   <ItemGroup>
